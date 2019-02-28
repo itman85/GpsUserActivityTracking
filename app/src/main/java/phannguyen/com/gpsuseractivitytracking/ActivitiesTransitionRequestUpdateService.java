@@ -137,6 +137,7 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
                     public void onFailure(Exception e) {
                         Log.e(TAG, "Transitions Api could not be registered: " + e);
                         //start get gps location not depend on user activities
+                        stopSelf();
                     }
                 });
     }

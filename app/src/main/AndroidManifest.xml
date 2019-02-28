@@ -23,6 +23,7 @@
         <service android:name=".ActivitiesTransitionRequestUpdateService" android:process=":kernel"/>
         <service android:name=".LocationRequestUpdateService" android:process=":geo"/>
         <service android:name=".TestGPSLocationTrackingService" android:process=":geo"/>
+        <service android:name=".GeofenceTransitionsIntentService" android:process=":geofencing"/>
         <receiver android:name=".TransitionTrackingReceiver">
             <intent-filter>
                 <action android:name="${applicationId}.TRANSITIONS_RECEIVER_ACTION" />

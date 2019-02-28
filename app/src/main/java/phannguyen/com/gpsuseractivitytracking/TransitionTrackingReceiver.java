@@ -42,12 +42,12 @@ public class TransitionTrackingReceiver extends BroadcastReceiver {
                         .format(new Date()));
 
                 //start request update location when device exit still
-                if(event.getTransitionType()==ActivityTransition.ACTIVITY_TRANSITION_EXIT){
+                if(event.getActivityType() == DetectedActivity.STILL && event.getTransitionType()==ActivityTransition.ACTIVITY_TRANSITION_EXIT){
                     Intent serviceIntent = new Intent(context,LocationRequestUpdateService.class);
                     serviceIntent.putExtra("action","START");
                     context.startService(serviceIntent);
 
-                }else if(event.getTransitionType()==ActivityTransition.ACTIVITY_TRANSITION_ENTER){
+                }else if(event.getActivityType() == DetectedActivity.STILL && event.getTransitionType()==ActivityTransition.ACTIVITY_TRANSITION_ENTER){
                     //device enter still, so stop request update location, no need to drain battery
                     Intent serviceIntent = new Intent(context,LocationRequestUpdateService.class);
                     serviceIntent.putExtra("action","STOP");
