@@ -39,6 +39,7 @@ public class GeofencingRequestService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.i(TAG, "Geo fencing request service created");
         geofencingClient = LocationServices.getGeofencingClient(this);
     }
 
@@ -61,14 +62,14 @@ public class GeofencingRequestService extends Service {
                 if (!addNewGeoSetting.isEmpty()) {
                     Log.i(TAG, "Geo fencing request add points now");
                     //2. call add geo fencing, will update if this request existing
-                    geofencingClient.addGeofences(getGeofencingRequest(addNewGeoSetting), getGeofencePendingIntent())
+                    geofencingClient.addGeofences(getGeofencingRequest(addNewGeoSetting), PendingIntentUtils.createGeofencingTransitionPendingIntent(this))
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
                                         Log.i(TAG, "Geo fencing request register successfully");
                                         //stop service
-                                        stopSelf();
+                                        //stopSelf();
                                     } else {
                                         Log.e(TAG, "Geo fencing request register fail");
                                         stopSelf();
@@ -84,7 +85,14 @@ public class GeofencingRequestService extends Service {
         return START_STICKY;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.i(TAG, "Geo fencing request service destroy");
+    }
+
     public void extractGeoDataFromIntent(Intent intent, List<String> addNewGeoSetting, List<String> removeGeoSetting) {
+        addNewGeoSetting.add("ok");//test data
         if (intent.hasExtra(KEY_REMOVE_LIST)) {
             String tempRemove = intent.getStringExtra(KEY_REMOVE_LIST);
             String[] tempArray = tempRemove.split(GEO_ID_PLIT_CHAR);
@@ -149,6 +157,22 @@ public class GeofencingRequestService extends Service {
         });
     }
     private List<Geofence> createGeofenceObjectsList(List<String> addedIdGeoPoints){
-        return null;
+        List<Geofence> geofencesList = new ArrayList<>();
+        geofencesList.add(createGeofence(10.775020, 106.686813,"1",200));//cmt8 vs nguyen dinh chieu
+        geofencesList.add(createGeofence(10.771563, 106.693179,"2",300));//cmt8 phu dong
+        geofencesList.add(createGeofence(10.761123, 106.700378,"3",500));//cau ong lanh vs hoang dieu
+        return geofencesList;
     }
+
+    private Geofence createGeofence(double lat, double lng, String key, int radius) {
+        return new Geofence.Builder()
+                .setRequestId(key)
+                .setCircularRegion(lat, lng, radius)
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
+                        Geofence.GEOFENCE_TRANSITION_EXIT)
+                //.setLoiteringDelay(10000)
+                .build();
+    }
+
 }

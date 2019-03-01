@@ -23,15 +23,21 @@
         <service android:name=".ActivitiesTransitionRequestUpdateService" android:process=":kernel"/>
         <service android:name=".LocationRequestUpdateService" android:process=":geo"/>
         <service android:name=".TestGPSLocationTrackingService" android:process=":geo"/>
-        <service android:name=".GeofenceTransitionsIntentService" android:process=":geofencing"/>
-        <receiver android:name=".TransitionTrackingReceiver">
+        <service android:name=".GeofenceTransitionsIntentService"/>
+        <service android:name=".GeofencingRequestService"/>
+        <receiver android:name=".TransitionTrackingReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="${applicationId}.TRANSITIONS_RECEIVER_ACTION" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".LocationTrackingReceiver">
+        <receiver android:name=".LocationTrackingReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="${applicationId}.LOCATION_UPDATE_RECEIVER_ACTION" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".GeofenceTransitionReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="${applicationId}.GEOFENCING_TRANSITION_RECEIVER_ACTION" />
             </intent-filter>
         </receiver>
     </application>
