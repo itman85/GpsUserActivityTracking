@@ -69,7 +69,7 @@ public class GeofencingRequestService extends Service {
                                     if (task.isSuccessful()) {
                                         Log.i(TAG, "Geo fencing request register successfully");
                                         //stop service
-                                        //stopSelf();
+                                        stopSelf();
                                     } else {
                                         Log.e(TAG, "Geo fencing request register fail");
                                         stopSelf();
@@ -115,7 +115,7 @@ public class GeofencingRequestService extends Service {
         return builder.build();
     }
 
-    private PendingIntent getGeofencePendingIntent() {
+    /*private PendingIntent getGeofencePendingIntent() {
         // Reuse the PendingIntent if we already have it.
         if (geofencePendingIntent != null) {
             return geofencePendingIntent;
@@ -126,11 +126,11 @@ public class GeofencingRequestService extends Service {
         geofencePendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.
                 FLAG_UPDATE_CURRENT);
         return geofencePendingIntent;
-    }
+    }*/
 
     //Stopping geofence monitoring when it is no longer needed or desired can help save battery power and CPU cycles on the device
     private void stopGeofencingMonitoring(){
-        geofencingClient.removeGeofences(getGeofencePendingIntent())
+        geofencingClient.removeGeofences(PendingIntentUtils.createGeofencingTransitionPendingIntent(this))
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
@@ -139,6 +139,7 @@ public class GeofencingRequestService extends Service {
                         }else{
                             Log.i(TAG,"Remove Geofencing Request Fail");
                         }
+                        stopSelf();
                     }
                 });
     }
@@ -156,11 +157,14 @@ public class GeofencingRequestService extends Service {
             }
         });
     }
+
+
     private List<Geofence> createGeofenceObjectsList(List<String> addedIdGeoPoints){
         List<Geofence> geofencesList = new ArrayList<>();
         geofencesList.add(createGeofence(10.775020, 106.686813,"1",200));//cmt8 vs nguyen dinh chieu
         geofencesList.add(createGeofence(10.771563, 106.693179,"2",300));//cmt8 phu dong
-        geofencesList.add(createGeofence(10.761123, 106.700378,"3",500));//cau ong lanh vs hoang dieu
+        //geofencesList.add(createGeofence(10.761123, 106.700378,"3",500));//cau ong lanh vs hoang dieu
+        geofencesList.add(createGeofence(10.740393, 106.700903,"Lotte",200));//cau ong lanh vs hoang dieu
         return geofencesList;
     }
 

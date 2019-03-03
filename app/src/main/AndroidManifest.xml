@@ -21,7 +21,7 @@
         </activity>
         <service android:name=".TestService" android:stopWithTask="false" />
         <service android:name=".ActivitiesTransitionRequestUpdateService" android:process=":kernel"/>
-        <service android:name=".LocationRequestUpdateService" android:process=":geo"/>
+        <service android:name=".LocationRequestUpdateService"/>
         <service android:name=".TestGPSLocationTrackingService" android:process=":geo"/>
         <service android:name=".GeofenceTransitionsIntentService"/>
         <service android:name=".GeofencingRequestService"/>

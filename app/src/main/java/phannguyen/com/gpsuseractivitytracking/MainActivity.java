@@ -3,12 +3,12 @@ package phannguyen.com.gpsuseractivitytracking;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
-import android.content.Intent;
+import android.arch.lifecycle.LiveData;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -16,12 +16,19 @@ import android.widget.Button;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
+import phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker;
+
+import static phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker.KEY_RESULT;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,10 +45,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //startService(new Intent(MainActivity.this,ActivitiesTransitionRequestUpdateService.class));
                 //
-                /*Intent serviceIntent = new Intent(MainActivity.this,GeofencingRequestService.class);
+                /*Intent serviceIntent = new Intent(MainActivity.this,LocationRequestUpdateService.class);
                 serviceIntent.putExtra("action","START");
                 startService(serviceIntent);*/
-                register();
+                //
+                //register();
+                //
+                applyUpdateLocationWork(tag);
 
             }
         });
@@ -52,10 +62,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //stopService(new Intent(MainActivity.this,ActivitiesTransitionRequestUpdateService.class));
                 //
-                /*Intent serviceIntent = new Intent(MainActivity.this,GeofencingRequestService.class);
+                /*Intent serviceIntent = new Intent(MainActivity.this,LocationRequestUpdateService.class);
                 serviceIntent.putExtra("action","STOP");
                 startService(serviceIntent);*/
-                stopGeofencingMonitoring();
+                //
+                //stopGeofencingMonitoring();
+                //
+                trackingWorkerByTag(tag);
 
             }
         });
@@ -68,14 +81,64 @@ public class MainActivity extends AppCompatActivity {
                             Manifest.permission.ACCESS_FINE_LOCATION},
                     100);
         }
+        //geofencingClient = LocationServices.getGeofencingClient(this);
+        mWorkManager = WorkManager.getInstance();
+
     }
 
+
+    private WorkManager mWorkManager;
+    private String tag = "location";
+    //repeat worker after interval time
+    private void applyUpdateLocationWork(String tag){
+       /* OneTimeWorkRequest locationWork =
+                new OneTimeWorkRequest.Builder(LocationUpdateWorker.class)
+                        .build();*/
+
+       //PeriodicWorkRequest.MIN_PERIODIC_INTERVAL_MILLIS is 15mins
+        PeriodicWorkRequest.Builder locationUpdateBuilder =
+                new PeriodicWorkRequest.Builder(LocationUpdateWorker.class, 20,
+                        TimeUnit.SECONDS);
+        PeriodicWorkRequest locationWork = locationUpdateBuilder.addTag(tag)
+                .build();
+        WorkManager.getInstance().enqueue(locationWork);
+        Log.i(TAG,"Location worker id "+ locationWork.getId());
+
+    }
+
+    private void trackingWorkerByTag(String tag){
+        LiveData<List<WorkInfo>> workInfos = mWorkManager.getWorkInfosByTagLiveData(tag);
+        workInfos.observe(this, listOfWorkInfo -> {
+
+            // If there are no matching work info, do nothing
+            if (listOfWorkInfo == null || listOfWorkInfo.isEmpty()) {
+                Log.i(TAG,"No work info");
+                return;
+            }
+
+            // We only care about the one output status.
+            WorkInfo workInfo = listOfWorkInfo.get(0);
+            boolean finished = workInfo.getState().isFinished();
+
+            if (!finished) {
+                Log.i(TAG,"work info not finish");
+            } else {
+                int myResult = workInfo.getOutputData().getInt(KEY_RESULT, -1);
+                Log.i(TAG,"work info finish result "+ myResult);
+
+            }
+        });
+    }
+
+    private void cancelWorkerByTag(String tag){
+        mWorkManager.cancelAllWorkByTag(tag);
+    }
+    ////////////////////////////////////////////////
     private GeofencingClient geofencingClient;
     private PendingIntent geofencePendingIntent;
 
     @SuppressLint("MissingPermission")
     private void register(){
-        geofencingClient = LocationServices.getGeofencingClient(this);
         geofencingClient.addGeofences(getGeofencingRequest(), PendingIntentUtils.createGeofencingTransitionPendingIntent(this))
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
@@ -98,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
         return builder.build();
     }
 
-    private PendingIntent getGeofencePendingIntent() {
+   /* private PendingIntent getGeofencePendingIntent() {
         // Reuse the PendingIntent if we already have it.
         if (geofencePendingIntent != null) {
             return geofencePendingIntent;
@@ -109,11 +172,11 @@ public class MainActivity extends AppCompatActivity {
         geofencePendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.
                 FLAG_UPDATE_CURRENT);
         return geofencePendingIntent;
-    }
+    }*/
 
     //Stopping geofence monitoring when it is no longer needed or desired can help save battery power and CPU cycles on the device
     private void stopGeofencingMonitoring(){
-        geofencingClient.removeGeofences(getGeofencePendingIntent())
+        geofencingClient.removeGeofences(PendingIntentUtils.createGeofencingTransitionPendingIntent(this))
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
@@ -130,11 +193,12 @@ public class MainActivity extends AppCompatActivity {
         List<Geofence> geofencesList = new ArrayList<>();
         geofencesList.add(createGeofence(10.775020, 106.686813,"1",200));//cmt8 vs nguyen dinh chieu
         geofencesList.add(createGeofence(10.771563, 106.693179,"2",300));//cmt8 phu dong
-        geofencesList.add(createGeofence(10.761123, 106.700378,"3",500));//cau ong lanh vs hoang dieu
+        //geofencesList.add(createGeofence(10.761123, 106.700378,"3",500));//cau ong lanh vs hoang dieu
+        geofencesList.add(createGeofence(10.740393, 106.700903,"Lotte",200));//cau ong lanh vs hoang dieu
         return geofencesList;
     }
 
-    private Geofence createGeofence(double lat, double lng, String key, int radius) {
+    private Geofence createGeofence(double lat, double lng, String key, float radius) {
         return new Geofence.Builder()
                 .setRequestId(key)
                 .setCircularRegion(lat, lng, radius)
