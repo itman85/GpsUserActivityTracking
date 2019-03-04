@@ -76,6 +76,7 @@ public class GeofencingRequestService extends Service {
                                     }
                                 }
                             });
+
                 }
             }
         }else if(intent.hasExtra("action") && "STOP".equals(intent.getStringExtra("action"))) {

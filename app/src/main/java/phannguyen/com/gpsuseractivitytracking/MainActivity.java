@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.arch.lifecycle.LiveData;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
+import phannguyen.com.gpsuseractivitytracking.jobs.LocationTrackingJobIntentService;
 import phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker;
 
 import static phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker.KEY_RESULT;
@@ -43,15 +45,16 @@ public class MainActivity extends AppCompatActivity {
         startBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //startService(new Intent(MainActivity.this,ActivitiesTransitionRequestUpdateService.class));
                 //
-                /*Intent serviceIntent = new Intent(MainActivity.this,LocationRequestUpdateService.class);
+                Intent serviceIntent = new Intent(MainActivity.this,ActivitiesTransitionRequestUpdateService.class);
                 serviceIntent.putExtra("action","START");
-                startService(serviceIntent);*/
+                startService(serviceIntent);
                 //
                 //register();
                 //
-                applyUpdateLocationWork(tag);
+                //applyUpdateLocationWork(tag);
+                //
+                //LocationTrackingJobIntentService.enqueueWork(MainActivity.this,new Intent(MainActivity.this,LocationTrackingJobIntentService.class));
 
             }
         });
@@ -60,15 +63,16 @@ public class MainActivity extends AppCompatActivity {
         stopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //stopService(new Intent(MainActivity.this,ActivitiesTransitionRequestUpdateService.class));
                 //
-                /*Intent serviceIntent = new Intent(MainActivity.this,LocationRequestUpdateService.class);
+                Intent serviceIntent = new Intent(MainActivity.this,ActivitiesTransitionRequestUpdateService.class);
                 serviceIntent.putExtra("action","STOP");
-                startService(serviceIntent);*/
+                startService(serviceIntent);
                 //
                 //stopGeofencingMonitoring();
                 //
-                trackingWorkerByTag(tag);
+                //trackingWorkerByTag(tag);
+                //
+                //LocationTrackingJobIntentService.cancelLocationTriggerAlarm(MainActivity.this);
 
             }
         });
@@ -80,6 +84,13 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
                             Manifest.permission.ACCESS_FINE_LOCATION},
                     100);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            this.requestPermissions(
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    101);
         }
         //geofencingClient = LocationServices.getGeofencingClient(this);
         mWorkManager = WorkManager.getInstance();

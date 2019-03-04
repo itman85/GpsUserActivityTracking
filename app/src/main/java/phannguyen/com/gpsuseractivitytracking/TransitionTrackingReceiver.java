@@ -15,6 +15,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import phannguyen.com.gpsuseractivitytracking.jobs.LocationTrackingJobIntentService;
+
 import static phannguyen.com.gpsuseractivitytracking.PendingIntentUtils.TRANSITIONS_RECEIVER_ACTION;
 
 /**
@@ -26,8 +28,11 @@ public class TransitionTrackingReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         // Handle the Activity Transition Response
+        Utils.appendLog(TAG,"I","TransitionTrackingRc OnReceive");
         if (!TRANSITIONS_RECEIVER_ACTION.equals(intent.getAction())) {
             Log.i(TAG,"Received an unsupported action in TransitionTrackingReceiver: action="
+                    + intent.getAction());
+            Utils.appendLog(TAG,"I","Received an unsupported action in TransitionTrackingReceiver: action="
                     + intent.getAction());
             return;
         }
@@ -40,18 +45,30 @@ public class TransitionTrackingReceiver extends BroadcastReceiver {
                         + activity + " (" + transitionType + ")" + "   "
                         + new SimpleDateFormat("HH:mm:ss", Locale.US)
                         .format(new Date()));
+                Utils.appendLog(TAG,"I","Transition: "
+                        + activity + " (" + transitionType + ")" + "   "
+                        + new SimpleDateFormat("HH:mm:ss", Locale.US)
+                        .format(new Date()));
 
                 //start request update location when device exit still
                 if(event.getActivityType() == DetectedActivity.STILL && event.getTransitionType()==ActivityTransition.ACTIVITY_TRANSITION_EXIT){
-                    Intent serviceIntent = new Intent(context,LocationRequestUpdateService.class);
+                    /*Intent serviceIntent = new Intent(context,LocationRequestUpdateService.class);
                     serviceIntent.putExtra("action","START");
-                    context.startService(serviceIntent);
+                    context.startService(serviceIntent);*/
+                    //start tracking location trigger interval
+                    Intent serviceIntent = new Intent(context,LocationTrackingJobIntentService.class);
+                    serviceIntent.putExtra("action","START");
+                    LocationTrackingJobIntentService.enqueueWork(context,serviceIntent);
+                    Utils.appendLog(TAG,"I","Start Location Tracking Job IS");
 
                 }else if(event.getActivityType() == DetectedActivity.STILL && event.getTransitionType()==ActivityTransition.ACTIVITY_TRANSITION_ENTER){
                     //device enter still, so stop request update location, no need to drain battery
-                    Intent serviceIntent = new Intent(context,LocationRequestUpdateService.class);
+                    /*Intent serviceIntent = new Intent(context,LocationRequestUpdateService.class);
                     serviceIntent.putExtra("action","STOP");
-                    context.startService(serviceIntent);
+                    context.startService(serviceIntent);*/
+                    //stop tracking location trigger interval
+                    LocationTrackingJobIntentService.cancelLocationTriggerAlarm(context);
+                    Utils.appendLog(TAG,"I","Cancel Location Tracking Alarm");
                 }
             }
         }

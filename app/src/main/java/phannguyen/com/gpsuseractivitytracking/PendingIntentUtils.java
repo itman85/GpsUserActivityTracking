@@ -3,6 +3,16 @@ package phannguyen.com.gpsuseractivitytracking;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Environment;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import phannguyen.com.gpsuseractivitytracking.jobs.LocationTriggerReceiver;
 
 
 public class PendingIntentUtils {
@@ -27,4 +37,13 @@ public class PendingIntentUtils {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         return pendingIntent;
     }
+
+    public static PendingIntent getLocationTriggerPendingIntent(Context context){
+        Intent intent = new Intent(context, LocationTriggerReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return pendingIntent;
+    }
+
+
 }

@@ -34,12 +34,14 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.i(TAG,"onCreate");//call first time start service, if start again it will call onStartCommand directly
+        Utils.appendLog(TAG,"I","onCreate");
 
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG,"onStartCommand");//call whenever start service call
+        Utils.appendLog(TAG,"I","onStartCommand");
         if(intent.hasExtra("action") && "START".equals(intent.getStringExtra("action"))) {
             if (mPendingIntent == null)
                 setupActivityTransitions();
@@ -53,6 +55,7 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.i(TAG,"onDestroy");
+        Utils.appendLog(TAG,"I","onDestroy");
         //removeActivityTransitionUpdate();
     }
 
@@ -119,6 +122,7 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
 
         // Register for Transitions Updates.
         Log.i(TAG,"Register for Transitions Updates");
+        Utils.appendLog(TAG,"I","Register for Transitions Updates");
         Task<Void> task =
                 ActivityRecognition.getClient(this)
                         .requestActivityTransitionUpdates(request, mPendingIntent);
@@ -127,6 +131,7 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
                     @Override
                     public void onSuccess(Void result) {
                         Log.i(TAG, "Transitions Api was successfully registered.");
+                        Utils.appendLog(TAG,"I","Transitions Api was successfully registered.");
                         //stop service
                         stopSelf();
                     }
@@ -136,6 +141,7 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
                     @Override
                     public void onFailure(Exception e) {
                         Log.e(TAG, "Transitions Api could not be registered: " + e);
+                        Utils.appendLog(TAG,"E","Transitions Api could not be registered: " + e.getMessage());
                         //start get gps location not depend on user activities
                         stopSelf();
                     }
@@ -152,12 +158,14 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.i(TAG, "Transitions successfully unregistered.");
+                        Utils.appendLog(TAG,"I","Transitions successfully unregistered.");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Transitions could not be unregistered: " + e);
+                        Utils.appendLog(TAG,"E","Transitions could not be unregistered: " + e.getMessage());
                     }
                 });
     }
