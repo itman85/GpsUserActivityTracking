@@ -2,7 +2,6 @@ package phannguyen.com.gpsuseractivitytracking;
 
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -159,6 +158,7 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
                     public void onSuccess(Void aVoid) {
                         Log.i(TAG, "Transitions successfully unregistered.");
                         Utils.appendLog(TAG,"I","Transitions successfully unregistered.");
+                        stopSelf();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -166,6 +166,7 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Transitions could not be unregistered: " + e);
                         Utils.appendLog(TAG,"E","Transitions could not be unregistered: " + e.getMessage());
+                        stopSelf();
                     }
                 });
     }

@@ -3,7 +3,6 @@ package phannguyen.com.gpsuseractivitytracking;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.android.gms.location.ActivityTransition;
@@ -28,6 +27,7 @@ public class TransitionTrackingReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         // Handle the Activity Transition Response
+        Log.i(TAG,"TransitionTrackingRc OnReceive");
         Utils.appendLog(TAG,"I","TransitionTrackingRc OnReceive");
         if (!TRANSITIONS_RECEIVER_ACTION.equals(intent.getAction())) {
             Log.i(TAG,"Received an unsupported action in TransitionTrackingReceiver: action="
@@ -56,10 +56,12 @@ public class TransitionTrackingReceiver extends BroadcastReceiver {
                     serviceIntent.putExtra("action","START");
                     context.startService(serviceIntent);*/
                     //start tracking location trigger interval
+                    Log.i(TAG,"Start Location Tracking Job IS");
+                    Utils.appendLog(TAG,"I","Start Location Tracking Job IS");
                     Intent serviceIntent = new Intent(context,LocationTrackingJobIntentService.class);
                     serviceIntent.putExtra("action","START");
                     LocationTrackingJobIntentService.enqueueWork(context,serviceIntent);
-                    Utils.appendLog(TAG,"I","Start Location Tracking Job IS");
+
 
                 }else if(event.getActivityType() == DetectedActivity.STILL && event.getTransitionType()==ActivityTransition.ACTIVITY_TRANSITION_ENTER){
                     //device enter still, so stop request update location, no need to drain battery
@@ -67,8 +69,10 @@ public class TransitionTrackingReceiver extends BroadcastReceiver {
                     serviceIntent.putExtra("action","STOP");
                     context.startService(serviceIntent);*/
                     //stop tracking location trigger interval
-                    LocationTrackingJobIntentService.cancelLocationTriggerAlarm(context);
+                    Log.i(TAG,"Cancel Location Tracking Alarm");
                     Utils.appendLog(TAG,"I","Cancel Location Tracking Alarm");
+                    LocationTrackingJobIntentService.cancelLocationTriggerAlarm(context);
+
                 }
             }
         }

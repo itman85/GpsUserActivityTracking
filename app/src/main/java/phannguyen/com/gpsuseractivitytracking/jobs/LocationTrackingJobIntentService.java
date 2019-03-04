@@ -5,7 +5,6 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.JobIntentService;
@@ -13,8 +12,6 @@ import android.util.Log;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
 import phannguyen.com.gpsuseractivitytracking.Utils;
@@ -76,6 +73,7 @@ public class LocationTrackingJobIntentService extends JobIntentService {
 
     public static void cancelLocationTriggerAlarm(Context context) {
         Log.i(TAG,"Cancel Location Trigger Alarm");
+        Utils.appendLog(TAG,"I","Cancel Location Trigger Alarm");
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(PendingIntentUtils.getLocationTriggerPendingIntent(context));
     }
