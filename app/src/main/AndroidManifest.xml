@@ -7,18 +7,25 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <meta-data
+            android:name="com.google.android.awareness.API_KEY"
+            android:value="AIzaSyDnpCnxo3GHiIvOcqjiy0396aWQsdKvrzI"/>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity android:name=".awareness.AwarenessActivity" android:theme="@style/AppTheme.NoActionBar">
+
         </activity>
         <service android:name=".TestService" android:stopWithTask="false" />
         <service android:name=".ActivitiesTransitionRequestUpdateService" android:process=":kernel"/>
@@ -46,6 +53,7 @@
             </intent-filter>
         </receiver>
         <receiver android:name=".jobs.LocationTriggerReceiver"></receiver>
+        <receiver android:name=".awareness.FenceReceiver"></receiver>
     </application>
 
 </manifest>

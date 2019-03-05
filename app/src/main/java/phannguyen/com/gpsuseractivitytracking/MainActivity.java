@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
+import phannguyen.com.gpsuseractivitytracking.awareness.AwarenessActivity;
 import phannguyen.com.gpsuseractivitytracking.jobs.LocationTrackingJobIntentService;
 import phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker;
 
@@ -74,6 +75,15 @@ public class MainActivity extends AppCompatActivity {
                 //
                 //LocationTrackingJobIntentService.cancelLocationTriggerAlarm(MainActivity.this);
 
+            }
+        });
+
+        Button awareBtn = findViewById(R.id.awarenessBtn);
+        awareBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //
+               startActivity(new Intent(MainActivity.this,AwarenessActivity.class));
             }
         });
 

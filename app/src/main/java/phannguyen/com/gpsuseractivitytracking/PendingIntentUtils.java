@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import phannguyen.com.gpsuseractivitytracking.awareness.FenceReceiver;
 import phannguyen.com.gpsuseractivitytracking.jobs.LocationTriggerReceiver;
 
 
@@ -45,5 +46,12 @@ public class PendingIntentUtils {
         return pendingIntent;
     }
 
+    public static PendingIntent getFenceAwareNessPendingIntent(Context context){
+        Intent intent = new Intent(context, FenceReceiver.class);
+        intent.setAction(FenceReceiver.FENCE_RECEIVER_ACTION);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return pendingIntent;
+    }
 
 }

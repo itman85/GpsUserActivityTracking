@@ -8,6 +8,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.google.android.gms.awareness.Awareness;
+import com.google.android.gms.awareness.fence.AwarenessFence;
+import com.google.android.gms.awareness.fence.DetectedActivityFence;
+import com.google.android.gms.awareness.fence.FenceUpdateRequest;
+import com.google.android.gms.awareness.fence.HeadphoneFence;
+import com.google.android.gms.awareness.state.HeadphoneState;
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.ActivityTransition;
 import com.google.android.gms.location.ActivityTransitionRequest;
@@ -43,9 +49,11 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
         Utils.appendLog(TAG,"I","onStartCommand");
         if(intent.hasExtra("action") && "START".equals(intent.getStringExtra("action"))) {
             if (mPendingIntent == null)
-                setupActivityTransitions();
+                setupFences();
+                //setupActivityTransitions();
         }else if(intent.hasExtra("action") && "STOP".equals(intent.getStringExtra("action"))){
-            removeActivityTransitionUpdateRequest();
+            //removeActivityTransitionUpdateRequest();
+            removeFence();
         }
         return START_STICKY;
     }
@@ -171,5 +179,72 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
                 });
     }
 
+    public static  final String FENCE_KEY = "fence_key";
+    private void setupFences() {
+        // DetectedActivityFence will fire when it detects the user performing the specified
+        // activity.  In this case it's walking.
+        AwarenessFence walkingFence = DetectedActivityFence.during(DetectedActivityFence.WALKING);
+
+        AwarenessFence stayFence = DetectedActivityFence.during(DetectedActivityFence.STILL);
+
+        // There are lots of cases where it's handy for the device to know if headphones have been
+        // plugged in or unplugged.  For instance, if a music app detected your headphones fell out
+        // when you were in a library, it'd be pretty considerate of the app to pause itself before
+        // the user got in trouble.
+        AwarenessFence headphoneFence = HeadphoneFence.during(HeadphoneState.PLUGGED_IN);
+
+        // Combines multiple fences into a compound fence.  While the first two fences trigger
+        // individually, this fence will only trigger its callback when all of its member fences
+        // hit a true state.
+        AwarenessFence walkingWithHeadphones = AwarenessFence.and(walkingFence, headphoneFence);
+
+        // We can even nest compound fences.  Using both "and" and "or" compound fences, this
+        // compound fence will determine when the user has headphones in and is engaging in at least
+        // one form of exercise.
+        // The below breaks down to "(headphones plugged in) AND (walking OR running OR bicycling)"
+        AwarenessFence exercisingWithHeadphonesFence = AwarenessFence.and(
+                headphoneFence,
+                AwarenessFence.or(
+                        walkingFence,
+                        DetectedActivityFence.during(DetectedActivityFence.RUNNING),
+                        DetectedActivityFence.during(DetectedActivityFence.ON_BICYCLE)));
+
+
+        // Now that we have an interesting, complex condition, register the fence to receive
+        // callbacks.
+
+        // Register the fence to receive callbacks.
+        mPendingIntent =  PendingIntentUtils.getFenceAwareNessPendingIntent(this);
+        Awareness.getFenceClient(this).updateFences(new FenceUpdateRequest.Builder()
+                .addFence(FENCE_KEY, stayFence,mPendingIntent)
+                .build())
+                .addOnSuccessListener(aVoid -> {
+                    Log.i(TAG, "Fence was successfully registered.");
+                    Utils.appendLog(TAG,"I","Fence was successfully registered.");
+                    stopSelf();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Fence could not be registered: " + e);
+                    Utils.appendLog(TAG,"E","Fence could not be registered: " + e);
+                    stopSelf();
+                });
+    }
+
+    private void removeFence(){
+        Awareness.getFenceClient(this).updateFences(new FenceUpdateRequest.Builder()
+                .removeFence(FENCE_KEY)
+                .build())
+                .addOnSuccessListener(aVoid -> {
+                    Log.i(TAG, "Fence was successfully unregistered.");
+                    Utils.appendLog(TAG,"I","Fence was successfully unregistered.");
+                    stopSelf();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Fence could not be unregistered: " + e);
+                    Utils.appendLog(TAG,"E","Fence could not be unregistered: " + e);
+                    stopSelf();
+                });
+
+    }
 
 }
