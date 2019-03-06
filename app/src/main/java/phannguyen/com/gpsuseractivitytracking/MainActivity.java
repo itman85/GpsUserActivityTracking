@@ -28,9 +28,11 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 import phannguyen.com.gpsuseractivitytracking.awareness.AwarenessActivity;
-import phannguyen.com.gpsuseractivitytracking.jobs.LocationTrackingJobIntentService;
 import phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker;
+import phannguyen.com.gpsuseractivitytracking.signal.ActivitiesTransitionRequestUpdateService;
+import phannguyen.com.gpsuseractivitytracking.signal.RegisterActivityFenceSignalWorker;
 
+import static phannguyen.com.gpsuseractivitytracking.Constants.REGISTER_ACTIVTY_WORK_TAG;
 import static phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker.KEY_RESULT;
 
 public class MainActivity extends AppCompatActivity {
@@ -56,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
                 //applyUpdateLocationWork(tag);
                 //
                 //LocationTrackingJobIntentService.enqueueWork(MainActivity.this,new Intent(MainActivity.this,LocationTrackingJobIntentService.class));
+                //
+                applyRegisterActivityFenceSignalWork(REGISTER_ACTIVTY_WORK_TAG);
 
             }
         });
@@ -107,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
+    ///////////////////////////////////////////////////////////////
     private WorkManager mWorkManager;
     private String tag = "location";
     //repeat worker after interval time
@@ -118,12 +122,23 @@ public class MainActivity extends AppCompatActivity {
 
        //PeriodicWorkRequest.MIN_PERIODIC_INTERVAL_MILLIS is 15mins
         PeriodicWorkRequest.Builder locationUpdateBuilder =
-                new PeriodicWorkRequest.Builder(LocationUpdateWorker.class, 20,
-                        TimeUnit.SECONDS);
+                new PeriodicWorkRequest.Builder(LocationUpdateWorker.class, 30,
+                        TimeUnit.MINUTES);
         PeriodicWorkRequest locationWork = locationUpdateBuilder.addTag(tag)
                 .build();
         WorkManager.getInstance().enqueue(locationWork);
         Log.i(TAG,"Location worker id "+ locationWork.getId());
+
+    }
+
+    private void applyRegisterActivityFenceSignalWork(String tag){
+        PeriodicWorkRequest.Builder registerActivityWorkBuilder =
+                new PeriodicWorkRequest.Builder(RegisterActivityFenceSignalWorker.class, 30,
+                        TimeUnit.MINUTES);
+        PeriodicWorkRequest registerWork = registerActivityWorkBuilder.addTag(tag)
+                .build();
+        WorkManager.getInstance().enqueue(registerWork);
+        Log.i(TAG,"Register activity fence signal worker id "+ registerWork.getId());
 
     }
 
@@ -154,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
     private void cancelWorkerByTag(String tag){
         mWorkManager.cancelAllWorkByTag(tag);
     }
-    ////////////////////////////////////////////////
+    ///////////////////////NOT WORK ANDROID 8/////////////////////////
     private GeofencingClient geofencingClient;
     private PendingIntent geofencePendingIntent;
 

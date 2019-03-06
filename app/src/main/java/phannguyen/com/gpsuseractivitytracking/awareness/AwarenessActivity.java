@@ -40,21 +40,23 @@ import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
 import phannguyen.com.gpsuseractivitytracking.R;
 import phannguyen.com.gpsuseractivitytracking.awareness.logger.LogFragment;
 
+import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_FENCE_KEY;
+import static phannguyen.com.gpsuseractivitytracking.PendingIntentUtils.ACTIVITY_SIGNAL_RECEIVER_ACTION;
+
 public class AwarenessActivity extends AppCompatActivity {
     // The fence key is how callback code determines which fence fired.
-    public static  final String FENCE_KEY = "fence_key";
+
 
     private final String TAG = getClass().getSimpleName();
 
    // private PendingIntent mPendingIntent;
 
-   // private FenceReceiver mFenceReceiver;
+   // private ActivityFenceSignalReceiver mFenceReceiver;
 
     private LogFragment mLogFragment;
 
     // The intent action which will be fired when your fence is triggered.
-    private final String FENCE_RECEIVER_ACTION =
-            BuildConfig.APPLICATION_ID + "FENCE_RECEIVER_ACTION";
+
 
 
     private static final int MY_PERMISSION_LOCATION = 1;
@@ -77,7 +79,7 @@ public class AwarenessActivity extends AppCompatActivity {
         //Intent intent = new Intent(FENCE_RECEIVER_ACTION);
         //mPendingIntent = PendingIntent.getBroadcast(AwarenessActivity.this, 0, intent, 0);
 
-        //mFenceReceiver = new FenceReceiver();
+        //mFenceReceiver = new ActivityFenceSignalReceiver();
         //registerReceiver(mFenceReceiver, new IntentFilter(FENCE_RECEIVER_ACTION));
 
         mLogFragment = (LogFragment) getSupportFragmentManager().findFragmentById(R.id.log_fragment);
@@ -93,7 +95,7 @@ public class AwarenessActivity extends AppCompatActivity {
     protected void onPause() {
         // Unregister the fence:
         Awareness.getFenceClient(this).updateFences(new FenceUpdateRequest.Builder()
-                .removeFence(FENCE_KEY)
+                .removeFence(ACTIVITY_FENCE_KEY)
                 .build())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -292,7 +294,7 @@ public class AwarenessActivity extends AppCompatActivity {
 
         // Register the fence to receive callbacks.
         Awareness.getFenceClient(this).updateFences(new FenceUpdateRequest.Builder()
-                .addFence(FENCE_KEY, stayFence, PendingIntentUtils.getFenceAwareNessPendingIntent(this))
+                .addFence(ACTIVITY_FENCE_KEY, stayFence, PendingIntentUtils.getFenceAwareNessPendingIntent(this))
                 .build())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -318,9 +320,9 @@ public class AwarenessActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             mLogFragment.getLogView().println("Fence onReceive");
-            if (!TextUtils.equals(FENCE_RECEIVER_ACTION, intent.getAction())) {
+            if (!TextUtils.equals(ACTIVITY_SIGNAL_RECEIVER_ACTION, intent.getAction())) {
                 mLogFragment.getLogView()
-                        .println("Received an unsupported action in FenceReceiver: action="
+                        .println("Received an unsupported action in ActivityFenceSignalReceiver: action="
                                 + intent.getAction());
                 return;
             }
@@ -328,7 +330,7 @@ public class AwarenessActivity extends AppCompatActivity {
             // The state information for the given fence is em
             FenceState fenceState = FenceState.extract(intent);
 
-            if (TextUtils.equals(fenceState.getFenceKey(), FENCE_KEY)) {
+            if (TextUtils.equals(fenceState.getFenceKey(), ACTIVITY_FENCE_KEY)) {
                 String fenceStateStr;
                 switch (fenceState.getCurrentState()) {
                     case FenceState.TRUE:

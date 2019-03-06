@@ -28,13 +28,17 @@
 
         </activity>
         <service android:name=".TestService" android:stopWithTask="false" />
-        <service android:name=".ActivitiesTransitionRequestUpdateService" android:process=":kernel"/>
+        <service android:name=".signal.ActivitiesTransitionRequestUpdateService" android:process=":kernel"/>
         <service android:name=".LocationRequestUpdateService"/>
         <service android:name=".TestGPSLocationTrackingService" android:process=":geo"/>
         <service android:name=".GeofenceTransitionsIntentService"/>
         <service android:name=".GeofencingRequestService"/>
         <service
             android:name=".jobs.LocationTrackingJobIntentService"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name=".core.CoreTrackingJobService"
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <receiver android:name=".TransitionTrackingReceiver" android:exported="false">
@@ -53,7 +57,18 @@
             </intent-filter>
         </receiver>
         <receiver android:name=".jobs.LocationTriggerReceiver"></receiver>
-        <receiver android:name=".awareness.FenceReceiver"></receiver>
+
+        <receiver android:name=".signal.ActivityFenceSignalReceiver">
+            <intent-filter>
+                <action android:name="${applicationId}.ACTIVITY_SIGNAL_RECEIVER_ACTION" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".core.LocationTriggerAlarmReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="${applicationId}.LOCATION_TRIGGER_ALARM_RECEIVER_ACTION" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

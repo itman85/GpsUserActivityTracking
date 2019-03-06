@@ -1,4 +1,4 @@
-package phannguyen.com.gpsuseractivitytracking;
+package phannguyen.com.gpsuseractivitytracking.signal;
 
 import android.app.PendingIntent;
 import android.app.Service;
@@ -25,9 +25,14 @@ import com.google.android.gms.tasks.Task;
 import java.util.ArrayList;
 import java.util.List;
 
+import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
+import phannguyen.com.gpsuseractivitytracking.Utils;
+
+import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_FENCE_KEY;
+
 
 public class ActivitiesTransitionRequestUpdateService extends Service {
-    private static final String TAG = "LTTrackingService" ;
+    private static final String TAG = "ActivityTrackingSv" ;
     PendingIntent mPendingIntent;
     @Nullable
     @Override
@@ -179,7 +184,6 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
                 });
     }
 
-    public static  final String FENCE_KEY = "fence_key";
     private void setupFences() {
         // DetectedActivityFence will fire when it detects the user performing the specified
         // activity.  In this case it's walking.
@@ -216,32 +220,32 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
         // Register the fence to receive callbacks.
         mPendingIntent =  PendingIntentUtils.getFenceAwareNessPendingIntent(this);
         Awareness.getFenceClient(this).updateFences(new FenceUpdateRequest.Builder()
-                .addFence(FENCE_KEY, stayFence,mPendingIntent)
+                .addFence(ACTIVITY_FENCE_KEY, stayFence,mPendingIntent)
                 .build())
                 .addOnSuccessListener(aVoid -> {
-                    Log.i(TAG, "Fence was successfully registered.");
-                    Utils.appendLog(TAG,"I","Fence was successfully registered.");
+                    Log.i(TAG, "Activity Fence was successfully registered.");
+                    Utils.appendLog(TAG,"I","Activity Fence was successfully registered.");
                     stopSelf();
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Fence could not be registered: " + e);
-                    Utils.appendLog(TAG,"E","Fence could not be registered: " + e);
+                    Log.e(TAG, "Activity Fence could not be registered: " + e);
+                    Utils.appendLog(TAG,"E","Activity Fence could not be registered: " + e);
                     stopSelf();
                 });
     }
 
     private void removeFence(){
         Awareness.getFenceClient(this).updateFences(new FenceUpdateRequest.Builder()
-                .removeFence(FENCE_KEY)
+                .removeFence(ACTIVITY_FENCE_KEY)
                 .build())
                 .addOnSuccessListener(aVoid -> {
-                    Log.i(TAG, "Fence was successfully unregistered.");
-                    Utils.appendLog(TAG,"I","Fence was successfully unregistered.");
+                    Log.i(TAG, "Activity Fence was successfully unregistered.");
+                    Utils.appendLog(TAG,"I","Activity Fence was successfully unregistered.");
                     stopSelf();
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Fence could not be unregistered: " + e);
-                    Utils.appendLog(TAG,"E","Fence could not be unregistered: " + e);
+                    Log.e(TAG, "Activity Fence could not be unregistered: " + e);
+                    Utils.appendLog(TAG,"E","Activity Fence could not be unregistered: " + e);
                     stopSelf();
                 });
 
