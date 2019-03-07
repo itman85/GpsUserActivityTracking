@@ -1,36 +1,34 @@
 package phannguyen.com.gpsuseractivitytracking.core;
 
 import android.annotation.SuppressLint;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.JobIntentService;
 import android.util.Log;
 
 import com.google.android.gms.awareness.Awareness;
-import com.google.android.gms.awareness.snapshot.DetectedActivityResponse;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.util.concurrent.TimeUnit;
+
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 import phannguyen.com.gpsuseractivitytracking.Constants;
-import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
 import phannguyen.com.gpsuseractivitytracking.Utils;
 import phannguyen.com.gpsuseractivitytracking.core.storage.SharePref;
-import phannguyen.com.gpsuseractivitytracking.jobs.LocationTrackingJobIntentService;
+import phannguyen.com.gpsuseractivitytracking.signal.LocationTrackingIntervalWorker;
 
 public class CoreTrackingJobService extends JobIntentService {
     private static final int JOB_ID = 1009;
     private static final String TAG = "CoreTrackingJobSv";
 
-    private static final int DELAY_IN_MS = 30*1000;//20S
+
     /**
      * Convenience method for enqueuing work in to this service.
      */
@@ -41,8 +39,8 @@ public class CoreTrackingJobService extends JobIntentService {
     @SuppressLint("MissingPermission")
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
-        Log.i(TAG,"Location tracking job service onHandleWork");
-        Utils.appendLog(TAG,"I","Location tracking job service onHandleWork");
+        Log.i(TAG,"CoreTrackingLocation job service on handle");
+        Utils.appendLog(TAG,"I","CoreTrackingLocation job service on handle");
         boolean isStartTrackingSignal = handleIntentSignal(intent);
         boolean statusTracking = SharePref.getGpsTrackingStatus(this);
         if(isStartTrackingSignal && statusTracking)
@@ -55,14 +53,14 @@ public class CoreTrackingJobService extends JobIntentService {
             if(location!=null){
                 processLocationData(location);
             }else {
-                startAlarmLocationTrigger(DELAY_IN_MS);
+                startAlarmLocationTrigger(Constants.INTERVAL_SLOW_MOVE_IN_MS);
             }
         }).addOnFailureListener(e -> {
             if(e!=null){
                 Log.e(TAG,e.getMessage());
-                Utils.appendLog(TAG,"I","Tracking location Error "+ e.getMessage());
+                Utils.appendLog(TAG,"I","CoreTrackingLocation job service Error "+ e.getMessage());
             }
-            startAlarmLocationTrigger(DELAY_IN_MS);
+            startAlarmLocationTrigger(Constants.INTERVAL_SLOW_MOVE_IN_MS);
         });
     }
 
@@ -70,11 +68,33 @@ public class CoreTrackingJobService extends JobIntentService {
     public void onDestroy() {
         super.onDestroy();
         Log.i(TAG,"onDestroy");
-        Utils.appendLog(TAG,"I","onDestroy");
+        //Utils.appendLog(TAG,"I","onDestroy");
     }
 
+    private void startOnetimeRequest(int delayInSecond){
+        int lastInterval = SharePref.getLastSpeedInterval(this);
+        ExistingWorkPolicy workPolicy = ExistingWorkPolicy.REPLACE;//replace by new request
+        if(lastInterval==0)
+            SharePref.setLastSpeedInterval(this,delayInSecond);
+        else{
+            if(lastInterval<=delayInSecond)
+                workPolicy = ExistingWorkPolicy.KEEP;//keep last request
+            else {//new interval < last interval means that user speed up, move faster
+                workPolicy = ExistingWorkPolicy.REPLACE;//replace by new request
+                SharePref.setLastSpeedInterval(this,delayInSecond);
+            }
+        }
+        OneTimeWorkRequest locationIntervalWork=
+                new OneTimeWorkRequest.Builder(LocationTrackingIntervalWorker.class)
+                        .setInitialDelay(delayInSecond,TimeUnit.SECONDS)
+                        .addTag(Constants.LOCATION_TRACKING_INTERVAL_WORK_TAG)// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
+                        .build();
+        //WorkManager.getInstance().enqueue(locationIntervalWork);
+        WorkManager.getInstance().enqueueUniqueWork(Constants.LOCATION_TRACKING_INTERVAL_WORK_UNIQUE_NAME,workPolicy,locationIntervalWork);
+    }
     private void startAlarmLocationTrigger(int delayInMs){
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        startOnetimeRequest(delayInMs/1000);
+       /* AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         PendingIntent pendingIntent = PendingIntentUtils.getLocationTriggerAlarmPendingIntent(this);
         long triggerMoment = System.currentTimeMillis()+delayInMs;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -86,7 +106,7 @@ public class CoreTrackingJobService extends JobIntentService {
         } else {
             alarmManager.set(AlarmManager.RTC_WAKEUP, triggerMoment,
                     pendingIntent);
-        }
+        }*/
 
         /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             //this make alarm on time when device goes to doze mode, this will done_item_menu clock icon on device top bar
@@ -95,11 +115,12 @@ public class CoreTrackingJobService extends JobIntentService {
     }
 
     public static void cancelLocationTriggerAlarm(Context context) {
-        Log.i(TAG,"Cancel Location Trigger Alarm");
-        Utils.appendLog(TAG,"I","Cancel Location Trigger Alarm");
+        Log.i(TAG,"Cancel Location Trigger Interval Worker");
+        //Utils.appendLog(TAG,"I","Cancel Location Trigger Alarm");
         SharePref.setGpsTrackingStatus(context,false);
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(PendingIntentUtils.getLocationTriggerAlarmPendingIntent(context));
+        //AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        //alarmManager.cancel(PendingIntentUtils.getLocationTriggerAlarmPendingIntent(context));
+        WorkManager.getInstance().cancelUniqueWork(Constants.LOCATION_TRACKING_INTERVAL_WORK_UNIQUE_NAME);
     }
 
     /**
@@ -110,9 +131,9 @@ public class CoreTrackingJobService extends JobIntentService {
     private boolean handleIntentSignal(Intent intent){
         if(intent!=null && intent.hasExtra(Constants.SIGNAL_KEY)){
             Constants.SIGNAL fromSignal =  Constants.SIGNAL.valueOf(intent.getStringExtra(Constants.SIGNAL_KEY));
-            if(fromSignal == Constants.SIGNAL.NOT_STILL) {
-                Log.i(TAG,"Start Tracking From NOT STILL Signal");
-                Utils.appendLog(TAG,"I","Start Tracking From NOT STILL Signal");
+            if(fromSignal == Constants.SIGNAL.MOVE) {
+                Log.i(TAG,"Start Tracking From MOVE Signal");
+                Utils.appendLog(TAG,"I","Start Tracking From MOVE Signal");
                 return true;
             }
             return false;
@@ -125,7 +146,7 @@ public class CoreTrackingJobService extends JobIntentService {
         if(isMove){
             Log.i(TAG,"***User moving Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
             Utils.appendLog(TAG,"I","***User moving Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
-            startAlarmLocationTrigger(DELAY_IN_MS);
+            startAlarmLocationTrigger(Constants.INTERVAL_FAST_MOVE_IN_MS);
         }else{
             long lastStayMoment = SharePref.getLastMomentGPSNotChange(this);
             //check if user dont move for long time => user STILL
@@ -137,7 +158,7 @@ public class CoreTrackingJobService extends JobIntentService {
                 Log.i(TAG,"***User Stay a bit Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
                 Utils.appendLog(TAG,"I","***User stay a bit Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
                 //keep tracking location to see if user move or not
-                startAlarmLocationTrigger(DELAY_IN_MS);
+                startAlarmLocationTrigger(Constants.INTERVAL_SLOW_MOVE_IN_MS);
             }
         }
     }
@@ -145,7 +166,7 @@ public class CoreTrackingJobService extends JobIntentService {
     /**
      *
      * @param location
-     * @return true if user move, false if not move
+     * @return true if user move, false if not move or move too slow
      */
     private boolean checkUserLocationData(Location location){
         float lastLng = SharePref.getLastLngLocation(this);
@@ -201,9 +222,13 @@ public class CoreTrackingJobService extends JobIntentService {
                     //check if STILL now, so cancel tracking
                     if(probableActivity.getType() == DetectedActivity.STILL && confidence >= 70){
                         //user still, so cancel tracking location alarm
-                        Utils.appendLog(TAG,"I","User STILL now, cancel tracking location");
+                        Utils.appendLog(TAG,"I","User STILL now, Cancel location trigger interval worker");
                         cancelLocationTriggerAlarm(context);
                         updateLastLocation((float) location.getLatitude(),(float) location.getLongitude(),System.currentTimeMillis());
+                    }else{
+                        Utils.appendLog(TAG,"I","User NOT STILL now, keep tracking location by interval worker trigger");
+                        //seem user not move, so track again after quite long time
+                        startAlarmLocationTrigger(Constants.INTERVAL_VERY_SLOW_MOVE_IN_MS);
                     }
                 })
 

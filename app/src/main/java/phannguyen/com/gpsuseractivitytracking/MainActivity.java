@@ -24,14 +24,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 import phannguyen.com.gpsuseractivitytracking.awareness.AwarenessActivity;
 import phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker;
 import phannguyen.com.gpsuseractivitytracking.signal.ActivitiesTransitionRequestUpdateService;
+import phannguyen.com.gpsuseractivitytracking.signal.LocationTrackingIntervalWorker;
 import phannguyen.com.gpsuseractivitytracking.signal.RegisterActivityFenceSignalWorker;
 
+import static phannguyen.com.gpsuseractivitytracking.Constants.LOCATION_TRACKING_INTERVAL_WORK_TAG;
 import static phannguyen.com.gpsuseractivitytracking.Constants.REGISTER_ACTIVTY_WORK_TAG;
 import static phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker.KEY_RESULT;
 
@@ -60,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
                 //LocationTrackingJobIntentService.enqueueWork(MainActivity.this,new Intent(MainActivity.this,LocationTrackingJobIntentService.class));
                 //
                 applyRegisterActivityFenceSignalWork(REGISTER_ACTIVTY_WORK_TAG);
+                //
+                //startOnetimeRequest(5,LOCATION_TRACKING_INTERVAL_WORK_TAG);
 
             }
         });
@@ -78,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
                 //trackingWorkerByTag(tag);
                 //
                 //LocationTrackingJobIntentService.cancelLocationTriggerAlarm(MainActivity.this);
+                cancelWorkerByTag(REGISTER_ACTIVTY_WORK_TAG);
 
             }
         });
@@ -87,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //
-               startActivity(new Intent(MainActivity.this,AwarenessActivity.class));
+               //startActivity(new Intent(MainActivity.this,AwarenessActivity.class));
             }
         });
 
@@ -129,6 +135,15 @@ public class MainActivity extends AppCompatActivity {
         WorkManager.getInstance().enqueue(locationWork);
         Log.i(TAG,"Location worker id "+ locationWork.getId());
 
+    }
+
+    private void startOnetimeRequest(int delayInSecond,String tag){
+        OneTimeWorkRequest locationIntervalWork=
+                new OneTimeWorkRequest.Builder(LocationTrackingIntervalWorker.class)
+                        .setInitialDelay(delayInSecond,TimeUnit.SECONDS)
+                        .addTag(tag)// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
+                        .build();
+        WorkManager.getInstance().enqueue(locationIntervalWork);
     }
 
     private void applyRegisterActivityFenceSignalWork(String tag){

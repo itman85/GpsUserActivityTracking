@@ -54,5 +54,17 @@ public class SharePref {
         return sharedPreferences.getLong("gpsmomentnotchange",0);
     }
 
+    public static void setLastSpeedInterval(Context context, int interval){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt("lastSpeedInterval",interval);
+        editor.apply();
+    }
+
+    public static int getLastSpeedInterval(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getInt("lastSpeedInterval",0);
+    }
+
 
 }

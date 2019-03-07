@@ -59,7 +59,7 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
         Log.i(TAG,"User MOVE SIGNAL - Start Location Tracking Job IS");
         Utils.appendLog(TAG,"I","User MOVE SIGNAL - Start Location Tracking Job IS");
         Intent serviceIntent = new Intent(context,CoreTrackingJobService.class);
-        serviceIntent.putExtra(Constants.SIGNAL_KEY,Constants.SIGNAL.NOT_STILL.toString());
+        serviceIntent.putExtra(Constants.SIGNAL_KEY,Constants.SIGNAL.MOVE.toString());
         CoreTrackingJobService.enqueueWork(context,serviceIntent);
     }
 

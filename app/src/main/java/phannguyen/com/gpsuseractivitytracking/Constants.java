@@ -11,6 +11,9 @@ public class Constants {
     public static long FASTEST_INTERVAL = 2000; /* 2 sec */
     public static final int STAY_DISTANCE_IN_MET = 100;//in this distance, device consider as not move
     public static long TIMEOUT_STAY_LOCATION = 5*60*1000;  /* 5 MINS USER stay a location in 5 mins consider as STILL*/
+    public static final int INTERVAL_VERY_SLOW_MOVE_IN_MS = 120*1000;//2mins
+    public static final int INTERVAL_SLOW_MOVE_IN_MS = 60*1000;//1min
+    public static final int INTERVAL_FAST_MOVE_IN_MS = 30*1000;//30S
 
     public static final String KEY_REMOVE_LIST = "remove";
     public static final String KEY_ADD_NEW_LIST = "add_new";
@@ -18,9 +21,11 @@ public class Constants {
     public static final String SIGNAL_KEY  = "signal";
     public static  final String ACTIVITY_FENCE_KEY = "activity_fence_key";
     public static final String REGISTER_ACTIVTY_WORK_TAG  = "register_activity_work_tag";
+    public static final String LOCATION_TRACKING_INTERVAL_WORK_TAG  = "location_tracking_interval_work_tag";
+    public static final String LOCATION_TRACKING_INTERVAL_WORK_UNIQUE_NAME  = "location_tracking_interval_work_unique_name";
 
     public enum SIGNAL {
-        NOT_STILL("NOT_STILL");
+        MOVE("MOVE");
 
         private final String text;
         /**
