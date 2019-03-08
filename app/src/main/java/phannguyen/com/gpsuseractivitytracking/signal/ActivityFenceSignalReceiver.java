@@ -13,10 +13,13 @@ import phannguyen.com.gpsuseractivitytracking.Utils;
 import phannguyen.com.gpsuseractivitytracking.core.CoreTrackingJobService;
 
 import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_FENCE_KEY;
+import static phannguyen.com.gpsuseractivitytracking.Constants.ENTERING_LOCATION_FENCE_KEY;
+import static phannguyen.com.gpsuseractivitytracking.Constants.EXITING_LOCATION_FENCE_KEY;
 import static phannguyen.com.gpsuseractivitytracking.PendingIntentUtils.ACTIVITY_SIGNAL_RECEIVER_ACTION;
 
 public class ActivityFenceSignalReceiver extends BroadcastReceiver {
     private static final String TAG = "ActivitySignalRc";
+    private static final String TAG1 = "GeoFencingSignalRc";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -32,26 +35,76 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
         FenceState fenceState = FenceState.extract(intent);
 
         if (TextUtils.equals(fenceState.getFenceKey(), ACTIVITY_FENCE_KEY)) {
-            String fenceStateStr;
+            //String fenceStateStr;
             switch (fenceState.getCurrentState()) {
                 case FenceState.TRUE:
-                    fenceStateStr = "true";
                     stopLocationTrackingService(context);
                     break;
                 case FenceState.FALSE:
                     startLocationTrackingService(context);
-                    fenceStateStr = "false";
                     break;
                 case FenceState.UNKNOWN:
-                    fenceStateStr = "unknown";
                     stopLocationTrackingService(context);
                     break;
                 default:
-                    fenceStateStr = "unknown value";
                     stopLocationTrackingService(context);
             }
             //Log.i(TAG,"Fence state: " + fenceStateStr);
             //Utils.appendLog(TAG,"I","Fence state: " + fenceStateStr);
+        }/*else if(TextUtils.equals(fenceState.getFenceKey(), EXITING_LOCATION_FENCE_KEY)){
+            switch (fenceState.getCurrentState()) {
+                case FenceState.TRUE:
+                    Log.i(TAG,"**** User exit location geo fencing");
+                    Utils.appendLog(TAG,"I","*** User exit location geo fencing");
+                    break;
+                case FenceState.FALSE:
+                    Log.i(TAG,"User not exit location geo fencing");
+                    Utils.appendLog(TAG,"I","User not exit location geo fencing");
+                    break;
+                case FenceState.UNKNOWN:
+                    Log.i(TAG,"User unknown exit location geo fencing");
+                    Utils.appendLog(TAG,"I","User unknown exit location geo fencing");
+                    break;
+                default:
+                    Log.i(TAG,"User unknown exit location geo fencing");
+                    Utils.appendLog(TAG,"I","User unknown exit location geo fencing");
+            }
+        }else if(TextUtils.equals(fenceState.getFenceKey(), ENTERING_LOCATION_FENCE_KEY)){
+            switch (fenceState.getCurrentState()) {
+                case FenceState.TRUE:
+                    Log.i(TAG,"*** User enter location geo fencing");
+                    Utils.appendLog(TAG,"I","*** User enter location geo fencing");
+                    break;
+                case FenceState.FALSE:
+                    Log.i(TAG,"User not enter location geo fencing");
+                    Utils.appendLog(TAG,"I","User not enter location geo fencing");
+                    break;
+                case FenceState.UNKNOWN:
+                    Log.i(TAG,"User unknown enter location geo fencing");
+                    Utils.appendLog(TAG,"I","User unknown enter location geo fencing");
+                    break;
+                default:
+                    Log.i(TAG,"User unknown enter location geo fencing");
+                    Utils.appendLog(TAG,"I","User unknown enter location geo fencing");
+            }
+        }*/else {
+            switch (fenceState.getCurrentState()) {
+                case FenceState.TRUE:
+                    Log.i(TAG1,"******* User "+fenceState.getFenceKey());
+                    Utils.appendLog(TAG1,"I","******* User "+fenceState.getFenceKey());
+                    break;
+                case FenceState.FALSE:
+                    Log.i(TAG1,"User NOT "+fenceState.getFenceKey());
+                    //Utils.appendLog(TAG1,"I","User NOT "+fenceState.getFenceKey());
+                    break;
+                case FenceState.UNKNOWN:
+                    Log.i(TAG1,"User UNKNOWN "+fenceState.getFenceKey());
+                    //Utils.appendLog(TAG1,"I","User UNKNOWN "+fenceState.getFenceKey());
+                    break;
+                default:
+                    Log.i(TAG1,"User _UNKNOWN "+fenceState.getFenceKey());
+                    //Utils.appendLog(TAG1,"I","User _UNKNOWN "+fenceState.getFenceKey());
+            }
         }
     }
 

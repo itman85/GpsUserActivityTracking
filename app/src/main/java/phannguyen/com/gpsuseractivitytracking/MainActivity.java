@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -29,13 +28,11 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
-import phannguyen.com.gpsuseractivitytracking.awareness.AwarenessActivity;
 import phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker;
 import phannguyen.com.gpsuseractivitytracking.signal.ActivitiesTransitionRequestUpdateService;
 import phannguyen.com.gpsuseractivitytracking.signal.LocationTrackingIntervalWorker;
 import phannguyen.com.gpsuseractivitytracking.signal.RegisterActivityFenceSignalWorker;
 
-import static phannguyen.com.gpsuseractivitytracking.Constants.LOCATION_TRACKING_INTERVAL_WORK_TAG;
 import static phannguyen.com.gpsuseractivitytracking.Constants.REGISTER_ACTIVTY_WORK_TAG;
 import static phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker.KEY_RESULT;
 
@@ -80,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
             //trackingWorkerByTag(tag);
             //
             //LocationTrackingJobIntentService.cancelLocationTriggerAlarm(MainActivity.this);
-             cancelWorkerByTag(REGISTER_ACTIVTY_WORK_TAG);
+            cancelWorkerByTag(REGISTER_ACTIVTY_WORK_TAG);
             Toast.makeText(MainActivity.this,"Unregister tracking user activity",Toast.LENGTH_LONG).show();
 
         });
@@ -156,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void applyRegisterActivityFenceSignalWork(String tag){
         PeriodicWorkRequest.Builder registerActivityWorkBuilder =
-                new PeriodicWorkRequest.Builder(RegisterActivityFenceSignalWorker.class, 30,
+                new PeriodicWorkRequest.Builder(RegisterActivityFenceSignalWorker.class, 16,
                         TimeUnit.MINUTES);
         PeriodicWorkRequest registerWork = registerActivityWorkBuilder.addTag(tag)
                 .build();
@@ -253,7 +250,7 @@ public class MainActivity extends AppCompatActivity {
         geofencesList.add(createGeofence(10.775020, 106.686813,"1",200));//cmt8 vs nguyen dinh chieu
         geofencesList.add(createGeofence(10.771563, 106.693179,"2",300));//cmt8 phu dong
         //geofencesList.add(createGeofence(10.761123, 106.700378,"3",500));//cau ong lanh vs hoang dieu
-        geofencesList.add(createGeofence(10.740393, 106.700903,"Lotte",200));//cau ong lanh vs hoang dieu
+        geofencesList.add(createGeofence(10.740393, 106.700903,"Lotte",200));//lotte Q7
         return geofencesList;
     }
 

@@ -6,7 +6,7 @@ public class Constants {
     static final long DETECTION_INTERVAL_IN_MILLISECONDS = 30 * 1000;
 
     public static final int CONFIDENCE = 70;
-
+    public static long DWELL_TIME_IN_MS = 5 * 60 * 1000;  /* 5 MINS */
     public static long UPDATE_INTERVAL = 10 * 1000;  /* 10 secs */
     public static long FASTEST_INTERVAL = 2000; /* 2 sec */
     public static final int STAY_DISTANCE_IN_MET = 100;//in this distance, device consider as not move
@@ -23,6 +23,9 @@ public class Constants {
     public static final String REGISTER_ACTIVTY_WORK_TAG  = "register_activity_work_tag";
     public static final String LOCATION_TRACKING_INTERVAL_WORK_TAG  = "location_tracking_interval_work_tag";
     public static final String LOCATION_TRACKING_INTERVAL_WORK_UNIQUE_NAME  = "location_tracking_interval_work_unique_name";
+    //
+    public static final String EXITING_LOCATION_FENCE_KEY = "EXITING_LOCATION_FENCE_KEY";
+    public static final String ENTERING_LOCATION_FENCE_KEY = "ENTERING_LOCATION_FENCE_KEY";
 
     public enum SIGNAL {
         MOVE("MOVE");

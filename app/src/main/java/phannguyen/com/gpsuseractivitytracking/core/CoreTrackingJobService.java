@@ -114,7 +114,7 @@ public class CoreTrackingJobService extends JobIntentService {
         }*/
     }
 
-    public static void cancelLocationTriggerAlarm(Context context) {
+    private static void cancelLocationTriggerAlarm(Context context) {
         Log.i(TAG,"Cancel Location Trigger Interval Worker");
         //Utils.appendLog(TAG,"I","Cancel Location Trigger Alarm");
         SharePref.setGpsTrackingStatus(context,false);

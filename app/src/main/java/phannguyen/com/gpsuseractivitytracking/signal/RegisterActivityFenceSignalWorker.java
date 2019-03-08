@@ -1,7 +1,11 @@
 package phannguyen.com.gpsuseractivitytracking.signal;
 
+import android.Manifest;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.google.android.gms.awareness.Awareness;
@@ -9,11 +13,16 @@ import com.google.android.gms.awareness.fence.AwarenessFence;
 import com.google.android.gms.awareness.fence.DetectedActivityFence;
 import com.google.android.gms.awareness.fence.FenceUpdateRequest;
 import com.google.android.gms.awareness.fence.HeadphoneFence;
+import com.google.android.gms.awareness.fence.LocationFence;
 import com.google.android.gms.awareness.state.HeadphoneState;
+
+import java.util.List;
 
 import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
+import phannguyen.com.gpsuseractivitytracking.Constants;
+import phannguyen.com.gpsuseractivitytracking.GeoFencingPlaceModel;
 import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
 import phannguyen.com.gpsuseractivitytracking.Utils;
 
@@ -33,6 +42,7 @@ public class RegisterActivityFenceSignalWorker extends Worker {
     public Result doWork() {
         Log.i(TAG,"Work time "+ count + " at " +System.currentTimeMillis());
         setupFences();
+        setupGeoFencing();
         Data output = new Data.Builder()
                 .putInt(KEY_RESULT, count)
                 .build();
@@ -85,6 +95,50 @@ public class RegisterActivityFenceSignalWorker extends Worker {
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Activity Fence could not be registered again: " + e);
                     Utils.appendLog(TAG,"E","Activity Fence could not be registered again: " + e);
+                });
+    }
+
+    private void setupGeoFencing() {
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        /*AwarenessFence exitingLocationFence = LocationFence.exiting(
+                10.740393, 106.700903, 200);
+        AwarenessFence enteringLocationFence = LocationFence.entering(
+                10.740393, 106.700903, 200);*/
+        PendingIntent pendingIntent = PendingIntentUtils.getFenceAwareNessPendingIntent(getApplicationContext());
+        FenceUpdateRequest.Builder fenceReqBuilder = new FenceUpdateRequest.Builder();
+        List<GeoFencingPlaceModel> geoFencingList = Utils.createListGeoFencingPlaces();
+        for(GeoFencingPlaceModel model:geoFencingList){
+            AwarenessFence exitingLocationFence = LocationFence.exiting(
+                    model.getLat(), model.getLng(), model.getRadius());
+            AwarenessFence enteringLocationFence = LocationFence.entering(
+                    model.getLat(), model.getLng(), model.getRadius());
+            AwarenessFence dwellLocationFence = LocationFence.in(
+                    model.getLat(), model.getLng(), model.getRadius(),Constants.DWELL_TIME_IN_MS);
+
+            fenceReqBuilder.addFence("exit_"+model.getName(),exitingLocationFence,pendingIntent);
+            fenceReqBuilder.addFence("enter_"+model.getName(),enteringLocationFence,pendingIntent);
+            fenceReqBuilder.addFence("dwell_"+model.getName(),dwellLocationFence,pendingIntent);
+        }
+        Log.i(TAG, "Geo Fence now registered again.");
+        Utils.appendLog(TAG,"I","Geo Fence now registered again.");
+
+        Awareness.getFenceClient(getApplicationContext()).updateFences(fenceReqBuilder.build())
+                .addOnSuccessListener(aVoid -> {
+                    Log.i(TAG, "Activity Geo Fence List were successfully registered.");
+                    Utils.appendLog(TAG, "I", "Activity Geo Fence List were successfully registered again.");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Activity Geo Fence List could not be registered: " + e);
+                    Utils.appendLog(TAG, "E", "Activity Geo Fence List could not be registered again: " + e);
                 });
     }
 }
