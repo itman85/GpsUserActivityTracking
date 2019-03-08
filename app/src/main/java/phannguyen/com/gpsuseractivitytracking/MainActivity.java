@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
@@ -48,69 +49,76 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Button startBtn = findViewById(R.id.startBtn);
-        startBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //
-                Intent serviceIntent = new Intent(MainActivity.this,ActivitiesTransitionRequestUpdateService.class);
-                serviceIntent.putExtra("action","START");
-                startService(serviceIntent);
-                //
-                //register();
-                //
-                //applyUpdateLocationWork(tag);
-                //
-                //LocationTrackingJobIntentService.enqueueWork(MainActivity.this,new Intent(MainActivity.this,LocationTrackingJobIntentService.class));
-                //
-                applyRegisterActivityFenceSignalWork(REGISTER_ACTIVTY_WORK_TAG);
-                //
-                //startOnetimeRequest(5,LOCATION_TRACKING_INTERVAL_WORK_TAG);
+        startBtn.setOnClickListener(v -> {
+            //
+            Intent serviceIntent = new Intent(MainActivity.this,ActivitiesTransitionRequestUpdateService.class);
+            serviceIntent.putExtra("action","START");
+            startService(serviceIntent);
+            //
+            //register();
+            //
+            //applyUpdateLocationWork(tag);
+            //
+            //LocationTrackingJobIntentService.enqueueWork(MainActivity.this,new Intent(MainActivity.this,LocationTrackingJobIntentService.class));
+            //
+            applyRegisterActivityFenceSignalWork(REGISTER_ACTIVTY_WORK_TAG);
+            //
+            //startOnetimeRequest(5,LOCATION_TRACKING_INTERVAL_WORK_TAG);
+            Toast.makeText(MainActivity.this,"Register tracking user activity successfully, please close app now!",Toast.LENGTH_LONG).show();
 
-            }
         });
 
         Button stopBtn = findViewById(R.id.stopBtn);
-        stopBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //
-                Intent serviceIntent = new Intent(MainActivity.this,ActivitiesTransitionRequestUpdateService.class);
-                serviceIntent.putExtra("action","STOP");
-                startService(serviceIntent);
-                //
-                //stopGeofencingMonitoring();
-                //
-                //trackingWorkerByTag(tag);
-                //
-                //LocationTrackingJobIntentService.cancelLocationTriggerAlarm(MainActivity.this);
-                cancelWorkerByTag(REGISTER_ACTIVTY_WORK_TAG);
+        stopBtn.setOnClickListener(v -> {
+            //
+            Intent serviceIntent = new Intent(MainActivity.this,ActivitiesTransitionRequestUpdateService.class);
+            serviceIntent.putExtra("action","STOP");
+            startService(serviceIntent);
+            //
+            //stopGeofencingMonitoring();
+            //
+            //trackingWorkerByTag(tag);
+            //
+            //LocationTrackingJobIntentService.cancelLocationTriggerAlarm(MainActivity.this);
+             cancelWorkerByTag(REGISTER_ACTIVTY_WORK_TAG);
+            Toast.makeText(MainActivity.this,"Unregister tracking user activity",Toast.LENGTH_LONG).show();
 
-            }
         });
 
         Button awareBtn = findViewById(R.id.awarenessBtn);
-        awareBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //
-               //startActivity(new Intent(MainActivity.this,AwarenessActivity.class));
-            }
+        awareBtn.setOnClickListener(v -> {
+            //
+           //startActivity(new Intent(MainActivity.this,AwarenessActivity.class));
+            Toast.makeText(MainActivity.this,"This button disable processing",Toast.LENGTH_LONG).show();
         });
+
+        List<String> permissionList = new ArrayList<>();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
                 && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            this.requestPermissions(
+           /* this.requestPermissions(
                     new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
                             Manifest.permission.ACCESS_FINE_LOCATION},
-                    100);
+                    100);*/
+            permissionList.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+            permissionList.add(Manifest.permission.ACCESS_FINE_LOCATION);
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
                 && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            this.requestPermissions(
+            /*this.requestPermissions(
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    101);*/
+            permissionList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+        if(!permissionList.isEmpty() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            String[] itemsArray = new String[permissionList.size()];
+            itemsArray = permissionList.toArray(itemsArray);
+            this.requestPermissions(
+                    itemsArray,
                     101);
+
         }
         //geofencingClient = LocationServices.getGeofencingClient(this);
         mWorkManager = WorkManager.getInstance();
