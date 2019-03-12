@@ -16,7 +16,7 @@
         android:theme="@style/AppTheme">
         <meta-data
             android:name="com.google.android.awareness.API_KEY"
-            android:value="AIzaSyDnpCnxo3GHiIvOcqjiy0396aWQsdKvrzI"/>
+            android:value="AIzaSyAQG6foWSxz8aBVXCkcaVQ6erZ-fdspgNE"/>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

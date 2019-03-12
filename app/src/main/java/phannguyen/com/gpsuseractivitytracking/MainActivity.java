@@ -14,6 +14,7 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
@@ -86,7 +87,10 @@ public class MainActivity extends AppCompatActivity {
         awareBtn.setOnClickListener(v -> {
             //
            //startActivity(new Intent(MainActivity.this,AwarenessActivity.class));
-            Toast.makeText(MainActivity.this,"This button disable processing",Toast.LENGTH_LONG).show();
+           // Crashlytics.getInstance().crash(); // Force a crash
+            //List<String> message = new ArrayList<>();
+            //message.add("123");
+            Toast.makeText(MainActivity.this,"This button disable processing" ,Toast.LENGTH_LONG).show();
         });
 
         List<String> permissionList = new ArrayList<>();
