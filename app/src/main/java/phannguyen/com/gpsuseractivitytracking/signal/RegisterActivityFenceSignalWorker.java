@@ -22,7 +22,7 @@ import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 import phannguyen.com.gpsuseractivitytracking.Constants;
-import phannguyen.com.gpsuseractivitytracking.GeoFencingPlaceModel;
+import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceModel;
 import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
 import phannguyen.com.gpsuseractivitytracking.Utils;
 
@@ -42,7 +42,7 @@ public class RegisterActivityFenceSignalWorker extends Worker {
     public Result doWork() {
         Log.i(TAG,"Work time "+ count + " at " +System.currentTimeMillis());
         setupFences();
-        setupGeoFencing();
+        //setupGeoFencing();
         Data output = new Data.Builder()
                 .putInt(KEY_RESULT, count)
                 .build();

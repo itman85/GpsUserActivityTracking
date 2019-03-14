@@ -14,6 +14,7 @@ import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import androidx.work.ExistingWorkPolicy;
@@ -22,11 +23,15 @@ import androidx.work.WorkManager;
 import phannguyen.com.gpsuseractivitytracking.Constants;
 import phannguyen.com.gpsuseractivitytracking.Utils;
 import phannguyen.com.gpsuseractivitytracking.core.storage.SharePref;
+import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceModel;
+import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceStatusModel;
+import phannguyen.com.gpsuseractivitytracking.geofencing.GeofencingDataManagement;
 import phannguyen.com.gpsuseractivitytracking.signal.LocationTrackingIntervalWorker;
 
 public class CoreTrackingJobService extends JobIntentService {
     private static final int JOB_ID = 1009;
     private static final String TAG = "CoreTrackingJobSv";
+    private static final String TAG1 = "GeoFencingTracking";
 
 
     /**
@@ -143,6 +148,7 @@ public class CoreTrackingJobService extends JobIntentService {
 
     private void processLocationData(Location location){
         boolean isMove = checkUserLocationData(location);
+        processGeoFencing(location);
         if(isMove){
             Log.i(TAG,"***User moving Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
             Utils.appendLog(TAG,"I","***User moving Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
@@ -162,6 +168,8 @@ public class CoreTrackingJobService extends JobIntentService {
             }
         }
     }
+
+
 
     /**
      *
@@ -197,6 +205,19 @@ public class CoreTrackingJobService extends JobIntentService {
         float distanceInMeters = loc1.distanceTo(loc2);
         return distanceInMeters;
     }
+
+    private float getMetersFromLatLong(double lat1, double lng1, double lat2, double lng2){
+        Location loc1 = new Location("");
+        loc1.setLatitude(lat1);
+        loc1.setLongitude(lng1);
+        Location loc2 = new Location("");
+        loc2.setLatitude(lat2);
+        loc2.setLongitude(lng2);
+        float distanceInMeters = loc1.distanceTo(loc2);
+        return distanceInMeters;
+    }
+
+
 
     private void updateLastLocation(float lat,float lng,long time){
         SharePref.setLastLatLocation(this, lat);
@@ -236,5 +257,51 @@ public class CoreTrackingJobService extends JobIntentService {
                     Log.e(TAG, "Could not detect activity: " + e);
                     Utils.appendLog(TAG,"E","Get Snapshot could not detect activity: " + e);
                 });
+    }
+
+    private void processGeoFencing(Location location){
+        Thread task = new Thread(() -> {
+            List<GeoFencingPlaceModel> geoPointsList = GeofencingDataManagement.Instance().getAllGeoPoints();
+            if(geoPointsList!=null && !geoPointsList.isEmpty()){
+                for(GeoFencingPlaceModel geoPoint:geoPointsList){
+                    checkGeoPointStatus(geoPoint,location);
+                }
+            }
+        });
+        task.start();
+
+    }
+
+    private void checkGeoPointStatus(GeoFencingPlaceModel geoPoint,Location location){
+        GeoFencingPlaceStatusModel geoPointStatusModel = GeofencingDataManagement.Instance().getGeoFencingPointOnProgress(geoPoint.getName());
+        float distance = getMetersFromLatLong(location.getLatitude(),location.getLongitude(),geoPoint.getLat(),geoPoint.getLng());
+        if(geoPointStatusModel!=null){
+            //check if user exit
+            if(distance > geoPoint.getRadius() && geoPointStatusModel.getTransition()==Constants.TRANSITION.ENTER){
+                geoPointStatusModel.setTransition(Constants.TRANSITION.EXIT);
+                geoPointStatusModel.setLastActiveTime(System.currentTimeMillis());
+                GeofencingDataManagement.Instance().addOrUpdateGeoOnProgress(geoPointStatusModel);
+                Log.i(TAG1,"Geo Fencing Exit "+ geoPoint.getName());
+                Utils.appendLog(TAG1,"I","Geo Fencing Exit "+ geoPoint.getName());
+            }else if(distance <= geoPoint.getRadius() && geoPointStatusModel.getTransition()==Constants.TRANSITION.EXIT){
+                //check if user enter
+                geoPointStatusModel.setTransition(Constants.TRANSITION.ENTER);
+                geoPointStatusModel.setLastActiveTime(System.currentTimeMillis());
+                GeofencingDataManagement.Instance().addOrUpdateGeoOnProgress(geoPointStatusModel);
+                Log.i(TAG1,"Geo Fencing Enter "+ geoPoint.getName());
+                Utils.appendLog(TAG1,"I","Geo Fencing Enter "+ geoPoint.getName());
+            }
+        }else{
+            //this is first moment user enter
+            if(distance <= geoPoint.getRadius()){
+                geoPointStatusModel = new GeoFencingPlaceStatusModel(geoPoint);
+                geoPointStatusModel.setTransition(Constants.TRANSITION.ENTER);
+                geoPointStatusModel.setLastActiveTime(System.currentTimeMillis());
+                GeofencingDataManagement.Instance().addOrUpdateGeoOnProgress(geoPointStatusModel);
+                Log.i(TAG1,"Geo Fencing Enter "+ geoPoint.getName());
+                Utils.appendLog(TAG1,"I","Geo Fencing Enter "+ geoPoint.getName());
+            }
+        }
+
     }
 }

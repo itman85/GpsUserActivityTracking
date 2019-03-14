@@ -29,6 +29,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
+import phannguyen.com.gpsuseractivitytracking.geofencing.GeofencingDataManagement;
 import phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker;
 import phannguyen.com.gpsuseractivitytracking.signal.ActivitiesTransitionRequestUpdateService;
 import phannguyen.com.gpsuseractivitytracking.signal.LocationTrackingIntervalWorker;
@@ -60,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
             //LocationTrackingJobIntentService.enqueueWork(MainActivity.this,new Intent(MainActivity.this,LocationTrackingJobIntentService.class));
             //
             applyRegisterActivityFenceSignalWork(REGISTER_ACTIVTY_WORK_TAG);
+            //
+            GeofencingDataManagement.Instance().addGeopointsList(Utils.createListGeoFencingPlaces());
             //
             //startOnetimeRequest(5,LOCATION_TRACKING_INTERVAL_WORK_TAG);
             Toast.makeText(MainActivity.this,"Register tracking user activity successfully, please close app now!",Toast.LENGTH_LONG).show();

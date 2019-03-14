@@ -42,4 +42,10 @@ public class Constants {
             return text;
         }
     }
+
+    public enum TRANSITION{
+        ENTER,
+        EXIT,
+        UNKNOWN;
+    }
 }

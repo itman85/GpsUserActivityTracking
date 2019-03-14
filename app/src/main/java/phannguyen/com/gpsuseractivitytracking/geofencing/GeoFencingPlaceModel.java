@@ -1,10 +1,11 @@
-package phannguyen.com.gpsuseractivitytracking;
+package phannguyen.com.gpsuseractivitytracking.geofencing;
 
 public class GeoFencingPlaceModel {
-    private double lat;
-    private double lng;
-    private int radius;
-    private String name;
+    protected double lat;
+    protected double lng;
+    protected int radius;
+    protected String name;
+
 
     public GeoFencingPlaceModel(double lat, double lng, int radius, String name) {
         this.lat = lat;
@@ -44,4 +45,8 @@ public class GeoFencingPlaceModel {
     public void setName(String name) {
         this.name = name;
     }
+
+
+
+
 }

@@ -1,12 +1,10 @@
 package phannguyen.com.gpsuseractivitytracking.signal;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -32,14 +30,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import phannguyen.com.gpsuseractivitytracking.Constants;
-import phannguyen.com.gpsuseractivitytracking.GeoFencingPlaceModel;
+import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceModel;
 import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
 import phannguyen.com.gpsuseractivitytracking.Utils;
 
 import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_FENCE_KEY;
-import static phannguyen.com.gpsuseractivitytracking.Constants.ENTERING_LOCATION_FENCE_KEY;
-import static phannguyen.com.gpsuseractivitytracking.Constants.EXITING_LOCATION_FENCE_KEY;
-import static phannguyen.com.gpsuseractivitytracking.Utils.createListGeoFencingPlaces;
 
 
 public class ActivitiesTransitionRequestUpdateService extends Service {
@@ -67,7 +62,7 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
         if (intent.hasExtra("action") && "START".equals(intent.getStringExtra("action"))) {
             if (mPendingIntent == null) {
                 setupFences();
-                setupGeoFencing();
+                //setupGeoFencing();
             }
             //setupActivityTransitions();
         } else if (intent.hasExtra("action") && "STOP".equals(intent.getStringExtra("action"))) {

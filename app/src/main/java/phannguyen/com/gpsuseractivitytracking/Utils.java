@@ -2,8 +2,6 @@ package phannguyen.com.gpsuseractivitytracking;
 
 import android.os.Environment;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -12,7 +10,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
+
+import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceModel;
 
 public class Utils {
     public static void appendLog(String tag,String type,String text)
@@ -23,7 +22,7 @@ public class Utils {
                 SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
                 String dateFormat = s.format(new Date());
 
-                File logFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()+"/mylog_"+tag+".txt");
+                File logFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()+"/testlocation/mylog_"+tag+".txt");
                 if (!logFile.exists())
                 {
                     try
@@ -69,6 +68,8 @@ public class Utils {
         geoList.add(new GeoFencingPlaceModel(10.753596, 106.702088,200,"CauKTe"));
         geoList.add(new GeoFencingPlaceModel(10.745254, 106.701887,100,"NHTho_D15"));
         geoList.add(new GeoFencingPlaceModel(10.745970, 106.708287,100,"Home"));
+
+        geoList.add(new GeoFencingPlaceModel(10.778449, 106.679971,200,"Workplace"));
 
 
         return geoList;
