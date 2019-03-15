@@ -1,4 +1,4 @@
-package phannguyen.com.gpsuseractivitytracking;
+package phannguyen.com.gpsuseractivitytracking.android7.geofencing;
 
 import android.Manifest;
 import android.app.PendingIntent;
@@ -21,6 +21,9 @@ import com.google.android.gms.tasks.Task;
 import java.util.ArrayList;
 import java.util.List;
 
+import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
+import phannguyen.com.gpsuseractivitytracking.Utils;
+
 import static phannguyen.com.gpsuseractivitytracking.Constants.GEO_ID_PLIT_CHAR;
 import static phannguyen.com.gpsuseractivitytracking.Constants.KEY_ADD_NEW_LIST;
 import static phannguyen.com.gpsuseractivitytracking.Constants.KEY_REMOVE_LIST;
@@ -40,6 +43,7 @@ public class GeofencingRequestService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "Geo fencing request service created");
+        Utils.appendLog(TAG,"I","Geo fencing request service created");
         geofencingClient = LocationServices.getGeofencingClient(this);
     }
 
@@ -48,6 +52,7 @@ public class GeofencingRequestService extends Service {
         if(intent.hasExtra("action") && "START".equals(intent.getStringExtra("action"))) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 Log.e(TAG, "No permission for geo fencing");
+                Utils.appendLog(TAG,"I","No permission for geo fencing");
                 stopSelf();
             } else {
                 //get add/remove from intent
@@ -57,30 +62,31 @@ public class GeofencingRequestService extends Service {
                 //1. call remove if there are list of remove points
                 if (!removeGeoSetting.isEmpty()) {
                     Log.i(TAG, "Geo fencing request remove points now");
+                    Utils.appendLog(TAG,"I","Geo fencing request remove points now");
                     removeGeofencingPoints(removeGeoSetting);
                 }
                 if (!addNewGeoSetting.isEmpty()) {
                     Log.i(TAG, "Geo fencing request add points now");
+                    Utils.appendLog(TAG,"I","Geo fencing request add points now");
                     //2. call add geo fencing, will update if this request existing
                     geofencingClient.addGeofences(getGeofencingRequest(addNewGeoSetting), PendingIntentUtils.createGeofencingTransitionPendingIntent(this))
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        Log.i(TAG, "Geo fencing request register successfully");
-                                        //stop service
-                                        stopSelf();
-                                    } else {
-                                        Log.e(TAG, "Geo fencing request register fail");
-                                        stopSelf();
-                                    }
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    Log.i(TAG, "Geo fencing request register successfully");
+                                    Utils.appendLog(TAG,"I","Geo fencing request register successfully");
+                                    //stop service
+                                    stopSelf();
+                                } else {
+                                    Log.e(TAG, "Geo fencing request register fail");
+                                    Utils.appendLog(TAG,"I","Geo fencing request register fail");
+                                    stopSelf();
                                 }
                             });
-
                 }
             }
         }else if(intent.hasExtra("action") && "STOP".equals(intent.getStringExtra("action"))) {
             Log.e(TAG, "***Geo fencing request remove...");
+            Utils.appendLog(TAG,"I","***Geo fencing request remove...");
             stopGeofencingMonitoring();
         }
         return START_STICKY;
@@ -132,29 +138,27 @@ public class GeofencingRequestService extends Service {
     //Stopping geofence monitoring when it is no longer needed or desired can help save battery power and CPU cycles on the device
     private void stopGeofencingMonitoring(){
         geofencingClient.removeGeofences(PendingIntentUtils.createGeofencingTransitionPendingIntent(this))
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            Log.i(TAG,"Remove Geofencing Request successful");
-                        }else{
-                            Log.i(TAG,"Remove Geofencing Request Fail");
-                        }
-                        stopSelf();
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.i(TAG,"Remove Geofencing Request successful");
+                        Utils.appendLog(TAG,"I","Remove Geofencing Request successful");
+                    }else{
+                        Log.i(TAG,"Remove Geofencing Request Fail");
+                        Utils.appendLog(TAG,"I","Remove Geofencing Request Fail");
                     }
+                    stopSelf();
                 });
     }
 
     //remove geo points which no longer need to monitor
     private void removeGeofencingPoints(List<String> pointsId){
-        geofencingClient.removeGeofences(pointsId).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Log.i(TAG,"Location alters have been removed");
-                }else{
-                    Log.i(TAG,"Location alters could not be removed");
-                }
+        geofencingClient.removeGeofences(pointsId).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Log.i(TAG,"Location alters have been removed");
+                Utils.appendLog(TAG,"I","Location alters have been removed");
+            }else{
+                Log.i(TAG,"Location alters could not be removed");
+                Utils.appendLog(TAG,"I","Location alters could not be removed");
             }
         });
     }
@@ -164,7 +168,7 @@ public class GeofencingRequestService extends Service {
         List<Geofence> geofencesList = new ArrayList<>();
         geofencesList.add(createGeofence(10.775020, 106.686813,"1",200));//cmt8 vs nguyen dinh chieu
         geofencesList.add(createGeofence(10.771563, 106.693179,"2",300));//cmt8 phu dong
-        //geofencesList.add(createGeofence(10.761123, 106.700378,"3",500));//cau ong lanh vs hoang dieu
+        geofencesList.add(createGeofence(10.740370, 106.700955,"3",100));//lotteq7
         geofencesList.add(createGeofence(10.740393, 106.700903,"Lotte",200));//cau ong lanh vs hoang dieu
         return geofencesList;
     }

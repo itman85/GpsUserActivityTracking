@@ -1,8 +1,8 @@
-package phannguyen.com.gpsuseractivitytracking;
+package phannguyen.com.gpsuseractivitytracking.android7.geofencing;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
+import android.app.IntentService;
 import android.content.Intent;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
@@ -10,16 +10,19 @@ import com.google.android.gms.location.GeofencingEvent;
 
 import java.util.List;
 
-/**
- * For background receive geofencing record data, using broadcast receiver instead of intentservice (for foreground)
- * http://www.hiren.dev/2015/01/android-geofence-stop-getting.html
- */
-public class GeofenceTransitionReceiver extends BroadcastReceiver {
-    private static final String TAG = "GeofencingTransitionRc";
+public class GeofenceTransitionsIntentService extends IntentService {
+    private static final String TAG = "GeoFencingTransitionSv";
+
+    /**
+     * Creates an IntentService.  Invoked by your subclass's constructor.
+     *
+     */
+    public GeofenceTransitionsIntentService() {
+        super(TAG);
+    }
 
     @Override
-    public void onReceive(Context context, Intent intent) {
-        Log.e(TAG, "Geo fencing trigger onReceive");
+    protected void onHandleIntent( @Nullable Intent intent) {
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
         if (geofencingEvent.hasError()) {
             Log.e(TAG, "geo fencing event error code "+ geofencingEvent.getErrorCode());

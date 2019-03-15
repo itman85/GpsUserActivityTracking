@@ -16,38 +16,35 @@ import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceModel;
 public class Utils {
     public static void appendLog(String tag,String type,String text)
     {
-        Thread task = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                String dateFormat = s.format(new Date());
+        Thread task = new Thread(() -> {
+            SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            String dateFormat = s.format(new Date());
 
-                File logFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()+"/testlocation/mylog_"+tag+".txt");
-                if (!logFile.exists())
-                {
-                    try
-                    {
-                        logFile.createNewFile();
-                    }
-                    catch (IOException e)
-                    {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
+            File logFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()+"/testlocation/mylog_"+tag+".txt");
+            if (!logFile.exists())
+            {
                 try
                 {
-                    //BufferedWriter for performance, true to set append to file flag
-                    BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
-                    buf.append(dateFormat + "  " + type+ "/" + tag + ": "+text);
-                    buf.newLine();
-                    buf.close();
+                    logFile.createNewFile();
                 }
                 catch (IOException e)
                 {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
+            }
+            try
+            {
+                //BufferedWriter for performance, true to set append to file flag
+                BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+                buf.append(dateFormat + "  " + type+ "/" + tag + ": "+text);
+                buf.newLine();
+                buf.close();
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
         });
         task.start();

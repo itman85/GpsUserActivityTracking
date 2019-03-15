@@ -1,4 +1,4 @@
-package phannguyen.com.gpsuseractivitytracking;
+package phannguyen.com.gpsuseractivitytracking.android7.locationtracking;
 
 import android.Manifest;
 import android.app.IntentService;
@@ -14,6 +14,9 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
+import phannguyen.com.gpsuseractivitytracking.Utils;
+
 import static phannguyen.com.gpsuseractivitytracking.Constants.FASTEST_INTERVAL;
 import static phannguyen.com.gpsuseractivitytracking.Constants.UPDATE_INTERVAL;
 
@@ -28,12 +31,13 @@ public class LocationRequestUpdateService extends IntentService {
     public LocationRequestUpdateService() {
         super(TAG);
         Log.i(TAG, "Location Request Update Service Created");
-
+        Utils.appendLog(TAG,"I","Location Request Update Service Created");
     }
 
     @Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
         Log.i(TAG, "Service onStartCommand");
+        Utils.appendLog(TAG,"I","Service onStartCommand");
         mContext = getApplicationContext();
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(mContext);
 
@@ -48,16 +52,20 @@ public class LocationRequestUpdateService extends IntentService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         Log.i(TAG, "Service onHandleIntent");
+        Utils.appendLog(TAG,"I","Service onHandleIntent");
         if(intent.hasExtra("action") && "START".equals(intent.getStringExtra("action"))) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                     && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 Log.e(TAG, "No location permission granted");
+                Utils.appendLog(TAG,"E","No location permission granted");
             } else {
                 Log.i(TAG, "Request location update");
+                Utils.appendLog(TAG,"I","Request location update now");
                 mFusedLocationClient.requestLocationUpdates(mLocationRequest, PendingIntentUtils.createLocationTrackingPendingIntent(this));
             }
         }else if(intent.hasExtra("action") && "STOP".equals(intent.getStringExtra("action"))){
             Log.e(TAG, "*** Remove Request location update");
+            Utils.appendLog(TAG,"I","*** Remove Request location update");
             removeLocationRequestUpdate();
         }
     }
@@ -66,6 +74,7 @@ public class LocationRequestUpdateService extends IntentService {
     public void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "Location Request Update Service Destroy");
+        Utils.appendLog(TAG,"I","**** Location Request Update Service Destroy");
     }
 
     private void removeLocationRequestUpdate(){

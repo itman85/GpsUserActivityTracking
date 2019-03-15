@@ -4,10 +4,13 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.arch.lifecycle.LiveData;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -29,12 +32,15 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
+import phannguyen.com.gpsuseractivitytracking.android7.geofencing.GeofencingRequestService;
+import phannguyen.com.gpsuseractivitytracking.android7.locationtracking.LocationRequestUpdateService;
 import phannguyen.com.gpsuseractivitytracking.geofencing.GeofencingDataManagement;
 import phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker;
 import phannguyen.com.gpsuseractivitytracking.signal.ActivitiesTransitionRequestUpdateService;
 import phannguyen.com.gpsuseractivitytracking.signal.LocationTrackingIntervalWorker;
 import phannguyen.com.gpsuseractivitytracking.signal.RegisterActivityFenceSignalWorker;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static phannguyen.com.gpsuseractivitytracking.Constants.REGISTER_ACTIVTY_WORK_TAG;
 import static phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker.KEY_RESULT;
 
@@ -50,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         Button startBtn = findViewById(R.id.startBtn);
         startBtn.setOnClickListener(v -> {
             //
-            Intent serviceIntent = new Intent(MainActivity.this,ActivitiesTransitionRequestUpdateService.class);
+            Intent serviceIntent = new Intent(MainActivity.this,GeofencingRequestService.class);
             serviceIntent.putExtra("action","START");
             startService(serviceIntent);
             //
@@ -60,9 +66,9 @@ public class MainActivity extends AppCompatActivity {
             //
             //LocationTrackingJobIntentService.enqueueWork(MainActivity.this,new Intent(MainActivity.this,LocationTrackingJobIntentService.class));
             //
-            applyRegisterActivityFenceSignalWork(REGISTER_ACTIVTY_WORK_TAG);
+            //applyRegisterActivityFenceSignalWork(REGISTER_ACTIVTY_WORK_TAG);
             //
-            GeofencingDataManagement.Instance().addGeopointsList(Utils.createListGeoFencingPlaces());
+            //GeofencingDataManagement.Instance().addGeopointsList(Utils.createListGeoFencingPlaces());
             //
             //startOnetimeRequest(5,LOCATION_TRACKING_INTERVAL_WORK_TAG);
             Toast.makeText(MainActivity.this,"Register tracking user activity successfully, please close app now!",Toast.LENGTH_LONG).show();
@@ -72,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         Button stopBtn = findViewById(R.id.stopBtn);
         stopBtn.setOnClickListener(v -> {
             //
-            Intent serviceIntent = new Intent(MainActivity.this,ActivitiesTransitionRequestUpdateService.class);
+            Intent serviceIntent = new Intent(MainActivity.this,GeofencingRequestService.class);
             serviceIntent.putExtra("action","STOP");
             startService(serviceIntent);
             //
@@ -93,7 +99,8 @@ public class MainActivity extends AppCompatActivity {
            // Crashlytics.getInstance().crash(); // Force a crash
             //List<String> message = new ArrayList<>();
             //message.add("123");
-            Toast.makeText(MainActivity.this,"This button disable processing" ,Toast.LENGTH_LONG).show();
+            //Toast.makeText(MainActivity.this,"This button disable processing" ,Toast.LENGTH_LONG).show();
+            askIgnoreBatteryPermission();
         });
 
         List<String> permissionList = new ArrayList<>();
@@ -129,6 +136,19 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void askIgnoreBatteryPermission(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            String packageName = getPackageName();
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                Intent intent = new Intent();
+                intent.setAction(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+                intent.setData(Uri.parse("package:" + packageName));
+                startActivity(intent);
+            }
+        }
+    }
     ///////////////////////////////////////////////////////////////
     private WorkManager mWorkManager;
     private String tag = "location";

@@ -4,6 +4,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
+import phannguyen.com.gpsuseractivitytracking.android7.geofencing.GeofenceTransitionReceiver;
+import phannguyen.com.gpsuseractivitytracking.android7.locationtracking.LocationTrackingReceiver;
 import phannguyen.com.gpsuseractivitytracking.core.LocationTriggerAlarmReceiver;
 import phannguyen.com.gpsuseractivitytracking.signal.ActivityFenceSignalReceiver;
 import phannguyen.com.gpsuseractivitytracking.jobs.LocationTriggerReceiver;
@@ -23,13 +25,15 @@ public class PendingIntentUtils {
     }
 
     public static PendingIntent createLocationTrackingPendingIntent(Context context){
-        Intent intent = new Intent(LOCATION_UPDATE_RECEIVER_ACTION);//LocationTrackingReceiver will handle this action, register in manifest
+        Intent intent = new Intent(context, LocationTrackingReceiver.class);
+        intent.setAction(LOCATION_UPDATE_RECEIVER_ACTION);//LocationTrackingReceiver will handle this action, register in manifest
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         return pendingIntent;
     }
 
     public static PendingIntent createGeofencingTransitionPendingIntent(Context context){
-        Intent intent = new Intent(GEOFENCING_TRANSITION_RECEIVER_ACTION);//LocationTrackingReceiver will handle this action, register in manifest
+        Intent intent = new Intent(context, GeofenceTransitionReceiver.class);
+        intent.setAction(GEOFENCING_TRANSITION_RECEIVER_ACTION);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         return pendingIntent;
     }

@@ -1,8 +1,8 @@
-package phannguyen.com.gpsuseractivitytracking;
+package phannguyen.com.gpsuseractivitytracking.android7.geofencing;
 
-import android.app.IntentService;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
@@ -10,22 +10,23 @@ import com.google.android.gms.location.GeofencingEvent;
 
 import java.util.List;
 
-public class GeofenceTransitionsIntentService extends IntentService {
-    private static final String TAG = "GeoFencingTransitionSv";
+import phannguyen.com.gpsuseractivitytracking.Utils;
 
-    /**
-     * Creates an IntentService.  Invoked by your subclass's constructor.
-     *
-     */
-    public GeofenceTransitionsIntentService() {
-        super(TAG);
-    }
+/**
+ * For background receive geofencing record data, using broadcast receiver instead of intentservice (for foreground)
+ * http://www.hiren.dev/2015/01/android-geofence-stop-getting.html
+ */
+public class GeofenceTransitionReceiver extends BroadcastReceiver {
+    private static final String TAG = "GeofencingTransitionRc";
 
     @Override
-    protected void onHandleIntent( @Nullable Intent intent) {
+    public void onReceive(Context context, Intent intent) {
+        Log.e(TAG, "Geo fencing trigger onReceive");
+        Utils.appendLog(TAG,"I","Geo fencing trigger onReceive");
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
         if (geofencingEvent.hasError()) {
             Log.e(TAG, "geo fencing event error code "+ geofencingEvent.getErrorCode());
+            Utils.appendLog(TAG,"I","geo fencing event error code "+ geofencingEvent.getErrorCode());
             return;
         }
 
@@ -41,10 +42,12 @@ public class GeofenceTransitionsIntentService extends IntentService {
             List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
             for(Geofence geofence:triggeringGeofences){
                 Log.i(TAG,"GeoFencing trigger at point id "+geofence.getRequestId()+ " type transition "+ geofenceTransition);
+                Utils.appendLog(TAG,"I","GeoFencing trigger at point id "+geofence.getRequestId()+ " type transition "+ geofenceTransition);
             }
         } else {
             // Log the error.
             Log.e(TAG, "Geo fencing trigger type transition invalid");
+            Utils.appendLog(TAG,"I","Geo fencing trigger type transition invalid");
         }
     }
 }
