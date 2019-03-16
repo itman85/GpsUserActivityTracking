@@ -41,13 +41,24 @@ public class GeofenceTransitionReceiver extends BroadcastReceiver {
             // multiple geofences.
             List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
             for(Geofence geofence:triggeringGeofences){
-                Log.i(TAG,"GeoFencing trigger at point id "+geofence.getRequestId()+ " type transition "+ geofenceTransition);
-                Utils.appendLog(TAG,"I","GeoFencing trigger at point id "+geofence.getRequestId()+ " type transition "+ geofenceTransition);
+                Log.i(TAG,"GeoFencing trigger at point id "+geofence.getRequestId()+ " type transition "+ toTransitionType(geofenceTransition));
+                Utils.appendLog(TAG,"I","GeoFencing trigger at point id "+geofence.getRequestId()+ " type transition "+ toTransitionType(geofenceTransition));
             }
         } else {
             // Log the error.
             Log.e(TAG, "Geo fencing trigger type transition invalid");
             Utils.appendLog(TAG,"I","Geo fencing trigger type transition invalid");
+        }
+    }
+
+    private static String toTransitionType(int transitionType) {
+        switch (transitionType) {
+            case Geofence.GEOFENCE_TRANSITION_ENTER:
+                return "ENTER";
+            case Geofence.GEOFENCE_TRANSITION_EXIT:
+                return "EXIT";
+            default:
+                return "UNKNOWN";
         }
     }
 }

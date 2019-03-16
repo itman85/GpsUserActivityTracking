@@ -6,7 +6,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
@@ -15,8 +14,6 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -169,7 +166,7 @@ public class GeofencingRequestService extends Service {
         geofencesList.add(createGeofence(10.775020, 106.686813,"1",200));//cmt8 vs nguyen dinh chieu
         geofencesList.add(createGeofence(10.771563, 106.693179,"2",300));//cmt8 phu dong
         geofencesList.add(createGeofence(10.740370, 106.700955,"3",100));//lotteq7
-        geofencesList.add(createGeofence(10.740393, 106.700903,"Lotte",200));//cau ong lanh vs hoang dieu
+        geofencesList.add(createGeofence(10.740375, 106.700972,"LotteQ7",200));//Lotte Q7
         return geofencesList;
     }
 

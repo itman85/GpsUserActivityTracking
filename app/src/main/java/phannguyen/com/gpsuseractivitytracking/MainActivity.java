@@ -17,10 +17,10 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
@@ -32,16 +32,12 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
-import phannguyen.com.gpsuseractivitytracking.android7.geofencing.GeofencingRequestService;
 import phannguyen.com.gpsuseractivitytracking.android7.locationtracking.LocationRequestUpdateService;
-import phannguyen.com.gpsuseractivitytracking.geofencing.GeofencingDataManagement;
 import phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker;
-import phannguyen.com.gpsuseractivitytracking.signal.ActivitiesTransitionRequestUpdateService;
 import phannguyen.com.gpsuseractivitytracking.signal.LocationTrackingIntervalWorker;
 import phannguyen.com.gpsuseractivitytracking.signal.RegisterActivityFenceSignalWorker;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static phannguyen.com.gpsuseractivitytracking.Constants.REGISTER_ACTIVTY_WORK_TAG;
 import static phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker.KEY_RESULT;
 
 public class MainActivity extends AppCompatActivity {
@@ -56,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         Button startBtn = findViewById(R.id.startBtn);
         startBtn.setOnClickListener(v -> {
             //
-            Intent serviceIntent = new Intent(MainActivity.this,GeofencingRequestService.class);
+            Intent serviceIntent = new Intent(MainActivity.this, LocationRequestUpdateService.class);
             serviceIntent.putExtra("action","START");
             startService(serviceIntent);
             //
@@ -78,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         Button stopBtn = findViewById(R.id.stopBtn);
         stopBtn.setOnClickListener(v -> {
             //
-            Intent serviceIntent = new Intent(MainActivity.this,GeofencingRequestService.class);
+            Intent serviceIntent = new Intent(MainActivity.this,LocationRequestUpdateService.class);
             serviceIntent.putExtra("action","STOP");
             startService(serviceIntent);
             //
@@ -87,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
             //trackingWorkerByTag(tag);
             //
             //LocationTrackingJobIntentService.cancelLocationTriggerAlarm(MainActivity.this);
-            cancelWorkerByTag(REGISTER_ACTIVTY_WORK_TAG);
+            //cancelWorkerByTag(REGISTER_ACTIVTY_WORK_TAG);
             Toast.makeText(MainActivity.this,"Unregister tracking user activity",Toast.LENGTH_LONG).show();
 
         });
@@ -131,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
                     101);
 
         }
-        //geofencingClient = LocationServices.getGeofencingClient(this);
+        geofencingClient = LocationServices.getGeofencingClient(this);
         mWorkManager = WorkManager.getInstance();
 
     }
