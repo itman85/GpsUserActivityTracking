@@ -144,7 +144,8 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
         Utils.appendLog(TAG, "I", "Register for Transitions Updates");
         Task<Void> task =
                 ActivityRecognition.getClient(this)
-                        .requestActivityTransitionUpdates(request, mPendingIntent);
+                        .requestActivityUpdates(5*60*1000,mPendingIntent);
+                        //.requestActivityTransitionUpdates(request, mPendingIntent);
         task.addOnSuccessListener(
                 result -> {
                     Log.i(TAG, "Transitions Api was successfully registered.");

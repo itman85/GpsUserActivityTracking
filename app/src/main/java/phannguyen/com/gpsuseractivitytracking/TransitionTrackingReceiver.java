@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.ActivityTransition;
 import com.google.android.gms.location.ActivityTransitionEvent;
 import com.google.android.gms.location.ActivityTransitionResult;
@@ -36,6 +37,39 @@ public class TransitionTrackingReceiver extends BroadcastReceiver {
                     + intent.getAction());
             return;
         }
+
+        if (ActivityRecognitionResult.hasResult(intent)) {
+            // Get the update
+            ActivityRecognitionResult result =
+                    ActivityRecognitionResult.extractResult(intent);
+
+            DetectedActivity mostProbableActivity
+                    = result.getMostProbableActivity();
+
+            // Get the confidence % (probability)
+            int confidence = mostProbableActivity.getConfidence();
+
+            // Get the type
+            int activityType = mostProbableActivity.getType();
+            String activity = toActivityString(mostProbableActivity.getType());
+            Utils.appendLog(TAG,"I","Activity: "
+                    + activity + " (confidence: " + confidence + ")" + "   "
+                    + new SimpleDateFormat("HH:mm:ss", Locale.US)
+                    .format(new Date()));
+            /* types:
+             * DetectedActivity.IN_VEHICLE
+             * DetectedActivity.ON_BICYCLE
+             * DetectedActivity.ON_FOOT
+             * DetectedActivity.STILL
+             * DetectedActivity.UNKNOWN
+             * DetectedActivity.TILTING
+             */
+            // process
+            return;
+        }
+
+
+
         if (ActivityTransitionResult.hasResult(intent)) {
             ActivityTransitionResult result = ActivityTransitionResult.extractResult(intent);
             for (ActivityTransitionEvent event : result.getTransitionEvents()) {
@@ -90,6 +124,8 @@ public class TransitionTrackingReceiver extends BroadcastReceiver {
                 return "ON_BICYCLE";
             case DetectedActivity.IN_VEHICLE:
                 return "IN_VEHICLE";
+            case DetectedActivity.TILTING:
+                return "TILTING";
             default:
                 return "UNKNOWN";
         }
