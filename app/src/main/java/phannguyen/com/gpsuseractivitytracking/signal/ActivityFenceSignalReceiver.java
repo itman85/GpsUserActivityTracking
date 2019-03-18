@@ -8,13 +8,9 @@ import android.util.Log;
 
 import com.google.android.gms.awareness.fence.FenceState;
 
-import phannguyen.com.gpsuseractivitytracking.Constants;
 import phannguyen.com.gpsuseractivitytracking.Utils;
-import phannguyen.com.gpsuseractivitytracking.core.CoreTrackingJobService;
 
 import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_FENCE_KEY;
-import static phannguyen.com.gpsuseractivitytracking.Constants.ENTERING_LOCATION_FENCE_KEY;
-import static phannguyen.com.gpsuseractivitytracking.Constants.EXITING_LOCATION_FENCE_KEY;
 import static phannguyen.com.gpsuseractivitytracking.PendingIntentUtils.ACTIVITY_SIGNAL_RECEIVER_ACTION;
 
 public class ActivityFenceSignalReceiver extends BroadcastReceiver {
@@ -111,9 +107,9 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
     private void startLocationTrackingService(Context context){
         Log.i(TAG,"User MOVE SIGNAL - Start Location Tracking Job IS");
         Utils.appendLog(TAG,"I","User MOVE SIGNAL - Start Location Tracking Job IS");
-        Intent serviceIntent = new Intent(context,CoreTrackingJobService.class);
+        /*Intent serviceIntent = new Intent(context,CoreTrackingJobService.class);
         serviceIntent.putExtra(Constants.SIGNAL_KEY,Constants.SIGNAL.MOVE.toString());
-        CoreTrackingJobService.enqueueWork(context,serviceIntent);
+        CoreTrackingJobService.enqueueWork(context,serviceIntent);*/
     }
 
     private void stopLocationTrackingService(Context context){

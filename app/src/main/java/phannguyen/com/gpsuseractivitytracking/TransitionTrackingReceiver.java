@@ -60,7 +60,7 @@ public class TransitionTrackingReceiver extends BroadcastReceiver {
                     Utils.appendLog(TAG,"I","Start Location Tracking Job IS");
                     Intent serviceIntent = new Intent(context,LocationTrackingJobIntentService.class);
                     serviceIntent.putExtra("action","START");
-                    LocationTrackingJobIntentService.enqueueWork(context,serviceIntent);
+                    //LocationTrackingJobIntentService.enqueueWork(context,serviceIntent);
 
 
                 }else if(event.getActivityType() == DetectedActivity.STILL && event.getTransitionType()==ActivityTransition.ACTIVITY_TRANSITION_ENTER){
@@ -71,7 +71,7 @@ public class TransitionTrackingReceiver extends BroadcastReceiver {
                     //stop tracking location trigger interval
                     Log.i(TAG,"Cancel Location Tracking Alarm");
                     Utils.appendLog(TAG,"I","Cancel Location Tracking Alarm");
-                    LocationTrackingJobIntentService.cancelLocationTriggerAlarm(context);
+                    //LocationTrackingJobIntentService.cancelLocationTriggerAlarm(context);
 
                 }
             }

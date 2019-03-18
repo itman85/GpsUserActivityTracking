@@ -6,7 +6,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
@@ -22,17 +21,15 @@ import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.ActivityTransition;
 import com.google.android.gms.location.ActivityTransitionRequest;
 import com.google.android.gms.location.DetectedActivity;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import phannguyen.com.gpsuseractivitytracking.Constants;
-import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceModel;
 import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
 import phannguyen.com.gpsuseractivitytracking.Utils;
+import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceModel;
 
 import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_FENCE_KEY;
 
@@ -61,13 +58,14 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
         Utils.appendLog(TAG, "I", "onStartCommand");
         if (intent.hasExtra("action") && "START".equals(intent.getStringExtra("action"))) {
             if (mPendingIntent == null) {
-                setupFences();
+                //setupFences();
                 //setupGeoFencing();
+                setupActivityTransitions();
             }
-            //setupActivityTransitions();
+
         } else if (intent.hasExtra("action") && "STOP".equals(intent.getStringExtra("action"))) {
-            //removeActivityTransitionUpdateRequest();
-            removeFence();
+            removeActivityTransitionUpdateRequest();
+            //removeFence();
         }
         return START_STICKY;
     }
@@ -148,24 +146,18 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
                 ActivityRecognition.getClient(this)
                         .requestActivityTransitionUpdates(request, mPendingIntent);
         task.addOnSuccessListener(
-                new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void result) {
-                        Log.i(TAG, "Transitions Api was successfully registered.");
-                        Utils.appendLog(TAG, "I", "Transitions Api was successfully registered.");
-                        //stop service
-                        stopSelf();
-                    }
+                result -> {
+                    Log.i(TAG, "Transitions Api was successfully registered.");
+                    Utils.appendLog(TAG, "I", "Transitions Api was successfully registered.");
+                    //stop service
+                    stopSelf();
                 });
         task.addOnFailureListener(
-                new OnFailureListener() {
-                    @Override
-                    public void onFailure(Exception e) {
-                        Log.e(TAG, "Transitions Api could not be registered: " + e);
-                        Utils.appendLog(TAG, "E", "Transitions Api could not be registered: " + e.getMessage());
-                        //start get gps location not depend on user activities
-                        stopSelf();
-                    }
+                e -> {
+                    Log.e(TAG, "Transitions Api could not be registered: " + e);
+                    Utils.appendLog(TAG, "E", "Transitions Api could not be registered: " + e.getMessage());
+                    //start get gps location not depend on user activities
+                    stopSelf();
                 });
     }
 
@@ -175,21 +167,15 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
     public void removeActivityTransitionUpdateRequest() {
         PendingIntent pendingIntent = PendingIntentUtils.createTransitionTrackingPendingIntent(this);
         ActivityRecognition.getClient(this).removeActivityTransitionUpdates(pendingIntent)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.i(TAG, "Transitions successfully unregistered.");
-                        Utils.appendLog(TAG, "I", "Transitions successfully unregistered.");
-                        stopSelf();
-                    }
+                .addOnSuccessListener(aVoid -> {
+                    Log.i(TAG, "Transitions successfully unregistered.");
+                    Utils.appendLog(TAG, "I", "Transitions successfully unregistered.");
+                    stopSelf();
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "Transitions could not be unregistered: " + e);
-                        Utils.appendLog(TAG, "E", "Transitions could not be unregistered: " + e.getMessage());
-                        stopSelf();
-                    }
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Transitions could not be unregistered: " + e);
+                    Utils.appendLog(TAG, "E", "Transitions could not be unregistered: " + e.getMessage());
+                    stopSelf();
                 });
     }
 
