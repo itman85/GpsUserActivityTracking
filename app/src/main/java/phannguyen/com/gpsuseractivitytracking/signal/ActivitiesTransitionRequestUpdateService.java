@@ -58,14 +58,14 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
         Utils.appendLog(TAG, "I", "onStartCommand");
         if (intent.hasExtra("action") && "START".equals(intent.getStringExtra("action"))) {
             if (mPendingIntent == null) {
-                //setupFences();
+                setupFences();
                 //setupGeoFencing();
-                setupActivityTransitions();
+                //setupActivityTransitions();
             }
 
         } else if (intent.hasExtra("action") && "STOP".equals(intent.getStringExtra("action"))) {
-            removeActivityTransitionUpdateRequest();
-            //removeFence();
+            //removeActivityTransitionUpdateRequest();
+            removeFence();
         }
         return START_STICKY;
     }
