@@ -141,10 +141,10 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
 
         // Register for Transitions Updates.
         Log.i(TAG, "Register for Transitions Updates");
-        Utils.appendLog(TAG, "I", "Register for Transitions Updates");
+        Utils.appendLog(TAG, "I", "Register for activity update interval");
         Task<Void> task =
                 ActivityRecognition.getClient(this)
-                        .requestActivityUpdates(5*60*1000,mPendingIntent);
+                        .requestActivityUpdates(0,mPendingIntent);
                         //.requestActivityTransitionUpdates(request, mPendingIntent);
         task.addOnSuccessListener(
                 result -> {
