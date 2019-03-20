@@ -20,7 +20,7 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.i(TAG,"Activity Fence onReceive");
-        Utils.appendLog(TAG,"I","Activity Fence onReceive");
+        //Utils.appendLog(TAG,"I","Activity Fence onReceive");
         if (!TextUtils.equals(ACTIVITY_SIGNAL_RECEIVER_ACTION, intent.getAction())) {
             Log.i(TAG,"Received an unsupported action in ActivityFenceSignalReceiver: action="
                     + intent.getAction());

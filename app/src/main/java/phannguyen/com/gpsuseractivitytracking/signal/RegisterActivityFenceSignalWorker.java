@@ -41,7 +41,7 @@ public class RegisterActivityFenceSignalWorker extends Worker {
     @Override
     public Result doWork() {
         Log.i(TAG,"Work time "+ count + " at " +System.currentTimeMillis());
-        //setupFences();
+        setupFences();
         setupGeoFencing();
         Data output = new Data.Builder()
                 .putInt(KEY_RESULT, count)

@@ -67,6 +67,9 @@ public class Utils {
         geoList.add(new GeoFencingPlaceModel(10.745970, 106.708287,100,"Home"));
 
         geoList.add(new GeoFencingPlaceModel(10.778449, 106.679971,200,"Workplace"));
+        geoList.add(new GeoFencingPlaceModel(10.761632, 106.689747,200,"THDao_TDXu"));
+        geoList.add(new GeoFencingPlaceModel(10.756505, 106.685195,100,"THDao_NVCu"));
+        geoList.add(new GeoFencingPlaceModel(10.738842, 106.689521,100,"VXoay_TS"));
 
 
         return geoList;

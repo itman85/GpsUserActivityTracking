@@ -59,7 +59,7 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
         if (intent.hasExtra("action") && "START".equals(intent.getStringExtra("action"))) {
             if (mPendingIntent == null) {
                 setupFences();
-                //setupGeoFencing();
+                setupGeoFencing();
                 //setupActivityTransitions();
             }
 
