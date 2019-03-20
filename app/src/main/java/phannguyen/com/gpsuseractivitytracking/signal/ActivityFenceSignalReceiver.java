@@ -9,6 +9,7 @@ import android.util.Log;
 import com.google.android.gms.awareness.fence.FenceState;
 
 import phannguyen.com.gpsuseractivitytracking.Utils;
+import phannguyen.com.gpsuseractivitytracking.android7.locationtracking.LocationRequestUpdateService;
 
 import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_FENCE_KEY;
 import static phannguyen.com.gpsuseractivitytracking.PendingIntentUtils.ACTIVITY_SIGNAL_RECEIVER_ACTION;
@@ -110,6 +111,9 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
         /*Intent serviceIntent = new Intent(context,CoreTrackingJobService.class);
         serviceIntent.putExtra(Constants.SIGNAL_KEY,Constants.SIGNAL.MOVE.toString());
         CoreTrackingJobService.enqueueWork(context,serviceIntent);*/
+        Intent serviceIntent = new Intent(context, LocationRequestUpdateService.class);
+        serviceIntent.putExtra("action","START");
+        context.startService(serviceIntent);
     }
 
     private void stopLocationTrackingService(Context context){

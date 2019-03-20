@@ -11,8 +11,7 @@ import android.util.Log;
 import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationResult;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +21,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 import phannguyen.com.gpsuseractivitytracking.Constants;
 import phannguyen.com.gpsuseractivitytracking.Utils;
+import phannguyen.com.gpsuseractivitytracking.android7.locationtracking.LocationRequestUpdateService;
 import phannguyen.com.gpsuseractivitytracking.core.storage.SharePref;
 import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceModel;
 import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceStatusModel;
@@ -46,6 +46,8 @@ public class CoreTrackingJobService extends JobIntentService {
     protected void onHandleWork(@NonNull Intent intent) {
         Log.i(TAG,"CoreTrackingLocation job service on handle");
         Utils.appendLog(TAG,"I","CoreTrackingLocation job service on handle");
+        handleLocationIntent(intent);
+        /*
         boolean isStartTrackingSignal = handleIntentSignal(intent);
         boolean statusTracking = SharePref.getGpsTrackingStatus(this);
         if(isStartTrackingSignal && statusTracking)
@@ -67,6 +69,15 @@ public class CoreTrackingJobService extends JobIntentService {
             }
             startAlarmLocationTrigger(Constants.INTERVAL_SLOW_MOVE_IN_MS);
         });
+        */
+    }
+
+    private void handleLocationIntent(Intent intent){
+        LocationResult locationResult = LocationResult.extractResult(intent);
+        Location location = locationResult.getLastLocation();
+        if (location != null) {
+            processLocationData(location);
+        }
     }
 
     @Override
@@ -152,19 +163,19 @@ public class CoreTrackingJobService extends JobIntentService {
         if(isMove){
             Log.i(TAG,"***User moving Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
             Utils.appendLog(TAG,"I","***User moving Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
-            startAlarmLocationTrigger(Constants.INTERVAL_FAST_MOVE_IN_MS);
+            //startAlarmLocationTrigger(Constants.INTERVAL_FAST_MOVE_IN_MS);
         }else{
             long lastStayMoment = SharePref.getLastMomentGPSNotChange(this);
             //check if user dont move for long time => user STILL
             if(System.currentTimeMillis() - lastStayMoment >= Constants.TIMEOUT_STAY_LOCATION){
-                Log.i(TAG,"***User Stay for long time Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
-                Utils.appendLog(TAG,"I","***User stay for long time Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
+                Log.i(TAG,"***User Stay for certant time Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
+                Utils.appendLog(TAG,"I","***User stay for certant time Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
                 getSnapshotCurrentActivity(this,location);
             }else{
-                Log.i(TAG,"***User Stay a bit Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
-                Utils.appendLog(TAG,"I","***User stay a bit Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
+                Log.i(TAG,"***User move slowly or stay a bit Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
+                Utils.appendLog(TAG,"I","***User  move slowly or stay a bit Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
                 //keep tracking location to see if user move or not
-                startAlarmLocationTrigger(Constants.INTERVAL_SLOW_MOVE_IN_MS);
+                //startAlarmLocationTrigger(Constants.INTERVAL_SLOW_MOVE_IN_MS);
             }
         }
     }
@@ -241,15 +252,19 @@ public class CoreTrackingJobService extends JobIntentService {
                     Utils.appendLog(TAG,"I","Get Snapshot Activity: " + activityStr
                             + ", Confidence: " + confidence + "/100");
                     //check if STILL now, so cancel tracking
-                    if(probableActivity.getType() == DetectedActivity.STILL && confidence >= 70){
+                    if(probableActivity.getType() == DetectedActivity.STILL && confidence >= 80){
                         //user still, so cancel tracking location alarm
-                        Utils.appendLog(TAG,"I","User STILL now, Cancel location trigger interval worker");
-                        cancelLocationTriggerAlarm(context);
+                        Utils.appendLog(TAG,"I","User STILL now, Cancel LocationRequestUpdateService");
+                        //cancelLocationTriggerAlarm(context);
+                        Intent serviceIntent = new Intent(context, LocationRequestUpdateService.class);
+                        serviceIntent.putExtra("action","STOP");
+                        startService(serviceIntent);
+                        //
                         updateLastLocation((float) location.getLatitude(),(float) location.getLongitude(),System.currentTimeMillis());
                     }else{
-                        Utils.appendLog(TAG,"I","User NOT STILL now, keep tracking location by interval worker trigger");
+                        Utils.appendLog(TAG,"I","User NOT STILL now, keep LocationRequestUpdateService");
                         //seem user not move, so track again after quite long time
-                        startAlarmLocationTrigger(Constants.INTERVAL_VERY_SLOW_MOVE_IN_MS);
+                        //startAlarmLocationTrigger(Constants.INTERVAL_VERY_SLOW_MOVE_IN_MS);
                     }
                 })
 

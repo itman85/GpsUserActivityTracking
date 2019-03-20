@@ -59,7 +59,7 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
         if (intent.hasExtra("action") && "START".equals(intent.getStringExtra("action"))) {
             if (mPendingIntent == null) {
                 setupFences();
-                setupGeoFencing();
+                //setupGeoFencing();
                 //setupActivityTransitions();
             }
 
@@ -232,12 +232,12 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
 
     private void removeFence() {
         FenceUpdateRequest.Builder fenceReqBuilder = new FenceUpdateRequest.Builder();
-        List<GeoFencingPlaceModel> geoFencingList = Utils.createListGeoFencingPlaces();
+        /*List<GeoFencingPlaceModel> geoFencingList = Utils.createListGeoFencingPlaces();
         for(GeoFencingPlaceModel model:geoFencingList){
             fenceReqBuilder.removeFence("exit_"+model.getName());
             fenceReqBuilder.removeFence("enter_"+model.getName());
             fenceReqBuilder.removeFence("dwell_"+model.getName());
-        }
+        }*/
 
         Awareness.getFenceClient(this).updateFences(fenceReqBuilder
                 .removeFence(ACTIVITY_FENCE_KEY)

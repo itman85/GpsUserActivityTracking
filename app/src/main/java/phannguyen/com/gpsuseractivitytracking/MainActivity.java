@@ -32,7 +32,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
-import phannguyen.com.gpsuseractivitytracking.android7.locationtracking.LocationRequestUpdateService;
+import phannguyen.com.gpsuseractivitytracking.geofencing.GeofencingDataManagement;
 import phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker;
 import phannguyen.com.gpsuseractivitytracking.signal.ActivitiesTransitionRequestUpdateService;
 import phannguyen.com.gpsuseractivitytracking.signal.LocationTrackingIntervalWorker;
@@ -53,9 +53,9 @@ public class MainActivity extends AppCompatActivity {
         Button startBtn = findViewById(R.id.startBtn);
         startBtn.setOnClickListener(v -> {
             //
-            Intent serviceIntent = new Intent(MainActivity.this, LocationRequestUpdateService.class);
+            /*Intent serviceIntent = new Intent(MainActivity.this, LocationRequestUpdateService.class);
             serviceIntent.putExtra("action","START");
-            startService(serviceIntent);
+            startService(serviceIntent);*/
             //
             Intent serviceIntent1 = new Intent(MainActivity.this, ActivitiesTransitionRequestUpdateService.class);
             serviceIntent1.putExtra("action","START");
@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
             //
             //applyRegisterActivityFenceSignalWork(REGISTER_ACTIVTY_WORK_TAG);
             //
-            //GeofencingDataManagement.Instance().addGeopointsList(Utils.createListGeoFencingPlaces());
+            GeofencingDataManagement.Instance().addGeopointsList(Utils.createListGeoFencingPlaces());
             //
             //startOnetimeRequest(5,LOCATION_TRACKING_INTERVAL_WORK_TAG);
             Toast.makeText(MainActivity.this,"Register tracking user activity successfully, please close app now!",Toast.LENGTH_LONG).show();
@@ -79,9 +79,9 @@ public class MainActivity extends AppCompatActivity {
         Button stopBtn = findViewById(R.id.stopBtn);
         stopBtn.setOnClickListener(v -> {
             //
-            Intent serviceIntent = new Intent(MainActivity.this,LocationRequestUpdateService.class);
+            /*Intent serviceIntent = new Intent(MainActivity.this,LocationRequestUpdateService.class);
             serviceIntent.putExtra("action","STOP");
-            startService(serviceIntent);
+            startService(serviceIntent);*/
             //
             Intent serviceIntent1 = new Intent(MainActivity.this,ActivitiesTransitionRequestUpdateService.class);
             serviceIntent1.putExtra("action","STOP");

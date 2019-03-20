@@ -6,10 +6,10 @@ import android.content.Intent;
 import android.location.Location;
 import android.util.Log;
 
-import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationResult;
 
 import phannguyen.com.gpsuseractivitytracking.Utils;
+import phannguyen.com.gpsuseractivitytracking.core.CoreTrackingJobService;
 
 public class LocationTrackingReceiver extends BroadcastReceiver {
     private static final String TAG = "LocationTrackingRc";
@@ -17,6 +17,7 @@ public class LocationTrackingReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (LocationResult.hasResult(intent)) {
+            CoreTrackingJobService.enqueueWork(context,intent);
             LocationResult locationResult = LocationResult.extractResult(intent);
             Location location = locationResult.getLastLocation();
             if (location != null) {
