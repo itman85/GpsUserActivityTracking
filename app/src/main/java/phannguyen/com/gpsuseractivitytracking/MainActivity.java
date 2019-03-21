@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
             //
             //applyRegisterActivityFenceSignalWork(REGISTER_ACTIVTY_WORK_TAG);
             //
-            GeofencingDataManagement.Instance().addGeopointsList(Utils.createListGeoFencingPlaces());
+            //GeofencingDataManagement.Instance().addGeopointsList(Utils.createListGeoFencingPlaces());
             //
             //startOnetimeRequest(5,LOCATION_TRACKING_INTERVAL_WORK_TAG);
             Toast.makeText(MainActivity.this,"Register tracking user activity successfully, please close app now!",Toast.LENGTH_LONG).show();

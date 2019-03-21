@@ -14,6 +14,7 @@ public class Constants {
     public static final int INTERVAL_VERY_SLOW_MOVE_IN_MS = 120*1000;//2mins
     public static final int INTERVAL_SLOW_MOVE_IN_MS = 60*1000;//1min
     public static final int INTERVAL_FAST_MOVE_IN_MS = 30*1000;//30S
+    public static final int INTERVAL_CHECK_STILL_IN_MS = 3*60*1000;//3mins
 
     public static final String KEY_REMOVE_LIST = "remove";
     public static final String KEY_ADD_NEW_LIST = "add_new";

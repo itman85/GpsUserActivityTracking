@@ -11,7 +11,10 @@ import android.util.Log;
 import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -44,72 +47,86 @@ public class CoreTrackingJobService extends JobIntentService {
     @SuppressLint("MissingPermission")
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
-        Log.i(TAG,"CoreTrackingLocation job service on handle");
-        Utils.appendLog(TAG,"I","CoreTrackingLocation job service on handle");
-        handleLocationIntent(intent);
-        /*
-        boolean isStartTrackingSignal = handleIntentSignal(intent);
-        boolean statusTracking = SharePref.getGpsTrackingStatus(this);
-        if(isStartTrackingSignal && statusTracking)
-            cancelLocationTriggerAlarm(this);//cancel for restart
-        if(!statusTracking)
-            SharePref.setGpsTrackingStatus(this,true);
-        //
-        FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        mFusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
-            if(location!=null){
-                processLocationData(location);
-            }else {
+        Log.i(TAG, "CoreTrackingLocation job service on handle");
+        Utils.appendLog(TAG, "I", "CoreTrackingLocation job service on handle");
+        boolean res = handleLocationIntent(intent);
+        if (!res) {
+            /*boolean isStartTrackingSignal = handleIntentSignal(intent);
+            boolean statusTracking = SharePref.getGpsTrackingStatus(this);
+            if (isStartTrackingSignal && statusTracking)
+                cancelLocationTriggerAlarm(this);//cancel for restart
+            if (!statusTracking)
+                SharePref.setGpsTrackingStatus(this, true);
+            */
+            //
+            FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+            mFusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+                if (location != null) {
+                    processLocationData(location);
+                } else {
+                    startAlarmLocationTrigger(Constants.INTERVAL_SLOW_MOVE_IN_MS);
+                }
+            }).addOnFailureListener(e -> {
+                if (e != null) {
+                    Log.e(TAG, e.getMessage());
+                    Utils.appendLog(TAG, "I", "CoreTrackingLocation job service Error " + e.getMessage());
+                }
                 startAlarmLocationTrigger(Constants.INTERVAL_SLOW_MOVE_IN_MS);
-            }
-        }).addOnFailureListener(e -> {
-            if(e!=null){
-                Log.e(TAG,e.getMessage());
-                Utils.appendLog(TAG,"I","CoreTrackingLocation job service Error "+ e.getMessage());
-            }
-            startAlarmLocationTrigger(Constants.INTERVAL_SLOW_MOVE_IN_MS);
-        });
-        */
+            });
+
+        }
     }
 
-    private void handleLocationIntent(Intent intent){
-        LocationResult locationResult = LocationResult.extractResult(intent);
-        Location location = locationResult.getLastLocation();
-        if (location != null) {
-            processLocationData(location);
+    private boolean handleLocationIntent(Intent intent) {
+        if (LocationResult.hasResult(intent)) {
+            LocationResult locationResult = LocationResult.extractResult(intent);
+            Location location = locationResult.getLastLocation();
+            if (location != null) {
+                processLocationData(location);
+                return true;
+            }
         }
+        return false;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.i(TAG,"onDestroy");
+        Log.i(TAG, "onDestroy");
         //Utils.appendLog(TAG,"I","onDestroy");
     }
 
-    private void startOnetimeRequest(int delayInSecond){
+    private void startOnetimeRequest(int delayInSecond) {
         int lastInterval = SharePref.getLastSpeedInterval(this);
         ExistingWorkPolicy workPolicy = ExistingWorkPolicy.REPLACE;//replace by new request
-        if(lastInterval==0)
-            SharePref.setLastSpeedInterval(this,delayInSecond);
-        else{
-            if(lastInterval<=delayInSecond)
+        if (lastInterval == 0)
+            SharePref.setLastSpeedInterval(this, delayInSecond);
+        else {
+            if (lastInterval <= delayInSecond)
                 workPolicy = ExistingWorkPolicy.KEEP;//keep last request
             else {//new interval < last interval means that user speed up, move faster
                 workPolicy = ExistingWorkPolicy.REPLACE;//replace by new request
-                SharePref.setLastSpeedInterval(this,delayInSecond);
+                SharePref.setLastSpeedInterval(this, delayInSecond);
             }
         }
-        OneTimeWorkRequest locationIntervalWork=
+        OneTimeWorkRequest locationIntervalWork =
                 new OneTimeWorkRequest.Builder(LocationTrackingIntervalWorker.class)
-                        .setInitialDelay(delayInSecond,TimeUnit.SECONDS)
+                        .setInitialDelay(delayInSecond, TimeUnit.SECONDS)
                         .addTag(Constants.LOCATION_TRACKING_INTERVAL_WORK_TAG)// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
                         .build();
         //WorkManager.getInstance().enqueue(locationIntervalWork);
-        WorkManager.getInstance().enqueueUniqueWork(Constants.LOCATION_TRACKING_INTERVAL_WORK_UNIQUE_NAME,workPolicy,locationIntervalWork);
+        WorkManager.getInstance().enqueueUniqueWork(Constants.LOCATION_TRACKING_INTERVAL_WORK_UNIQUE_NAME, workPolicy, locationIntervalWork);
     }
-    private void startAlarmLocationTrigger(int delayInMs){
-        startOnetimeRequest(delayInMs/1000);
+
+    private void startAlarmLocationTrigger(int delayInMs) {
+        //startOnetimeRequest(delayInMs/1000);
+        OneTimeWorkRequest locationIntervalWork =
+                new OneTimeWorkRequest.Builder(LocationTrackingIntervalWorker.class)
+                        .setInitialDelay(delayInMs, TimeUnit.MILLISECONDS)
+                        .addTag(Constants.LOCATION_TRACKING_INTERVAL_WORK_TAG)// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
+                        .build();
+        //WorkManager.getInstance().enqueue(locationIntervalWork);
+        WorkManager.getInstance().enqueueUniqueWork(Constants.LOCATION_TRACKING_INTERVAL_WORK_UNIQUE_NAME, ExistingWorkPolicy.KEEP, locationIntervalWork);
        /* AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         PendingIntent pendingIntent = PendingIntentUtils.getLocationTriggerAlarmPendingIntent(this);
         long triggerMoment = System.currentTimeMillis()+delayInMs;
@@ -131,25 +148,24 @@ public class CoreTrackingJobService extends JobIntentService {
     }
 
     private static void cancelLocationTriggerAlarm(Context context) {
-        Log.i(TAG,"Cancel Location Trigger Interval Worker");
+        Log.i(TAG, "Cancel Location Trigger Interval Worker");
         //Utils.appendLog(TAG,"I","Cancel Location Trigger Alarm");
-        SharePref.setGpsTrackingStatus(context,false);
+        SharePref.setGpsTrackingStatus(context, false);
         //AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         //alarmManager.cancel(PendingIntentUtils.getLocationTriggerAlarmPendingIntent(context));
         WorkManager.getInstance().cancelUniqueWork(Constants.LOCATION_TRACKING_INTERVAL_WORK_UNIQUE_NAME);
     }
 
     /**
-     *
      * @param intent
      * @return true force get location tracking, false: ignore
      */
-    private boolean handleIntentSignal(Intent intent){
-        if(intent!=null && intent.hasExtra(Constants.SIGNAL_KEY)){
-            Constants.SIGNAL fromSignal =  Constants.SIGNAL.valueOf(intent.getStringExtra(Constants.SIGNAL_KEY));
-            if(fromSignal == Constants.SIGNAL.MOVE) {
-                Log.i(TAG,"Start Tracking From MOVE Signal");
-                Utils.appendLog(TAG,"I","Start Tracking From MOVE Signal");
+    private boolean handleIntentSignal(Intent intent) {
+        if (intent != null && intent.hasExtra(Constants.SIGNAL_KEY)) {
+            Constants.SIGNAL fromSignal = Constants.SIGNAL.valueOf(intent.getStringExtra(Constants.SIGNAL_KEY));
+            if (fromSignal == Constants.SIGNAL.MOVE) {
+                Log.i(TAG, "Start Tracking From MOVE Signal");
+                Utils.appendLog(TAG, "I", "Start Tracking From MOVE Signal");
                 return true;
             }
             return false;
@@ -157,23 +173,23 @@ public class CoreTrackingJobService extends JobIntentService {
         return false;
     }
 
-    private void processLocationData(Location location){
+    private void processLocationData(Location location) {
         boolean isMove = checkUserLocationData(location);
-        processGeoFencing(location);
-        if(isMove){
-            Log.i(TAG,"***User moving Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
-            Utils.appendLog(TAG,"I","***User moving Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
+        //processGeoFencing(location);
+        if (isMove) {
+            Log.i(TAG, "***User moving Lat = " + location.getLatitude() + " - Lng= " + location.getLongitude());
+            Utils.appendLog(TAG, "I", "***User moving Lat = " + location.getLatitude() + " - Lng= " + location.getLongitude());
             //startAlarmLocationTrigger(Constants.INTERVAL_FAST_MOVE_IN_MS);
-        }else{
+        } else {
             long lastStayMoment = SharePref.getLastMomentGPSNotChange(this);
             //check if user dont move for long time => user STILL
-            if(System.currentTimeMillis() - lastStayMoment >= Constants.TIMEOUT_STAY_LOCATION){
-                Log.i(TAG,"***User Stay for certant time Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
-                Utils.appendLog(TAG,"I","***User stay for certant time Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
-                getSnapshotCurrentActivity(this,location);
-            }else{
-                Log.i(TAG,"***User move slowly or stay a bit Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
-                Utils.appendLog(TAG,"I","***User  move slowly or stay a bit Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
+            if (System.currentTimeMillis() - lastStayMoment >= Constants.TIMEOUT_STAY_LOCATION) {
+                Log.i(TAG, "***User Stay for certant time Lat = " + location.getLatitude() + " - Lng= " + location.getLongitude());
+                Utils.appendLog(TAG, "I", "***User stay for certant time Lat = " + location.getLatitude() + " - Lng= " + location.getLongitude());
+                getSnapshotCurrentActivity(this, location);
+            } else {
+                Log.i(TAG, "***User move slowly or stay a bit Lat = " + location.getLatitude() + " - Lng= " + location.getLongitude());
+                Utils.appendLog(TAG, "I", "***User  move slowly or stay a bit Lat = " + location.getLatitude() + " - Lng= " + location.getLongitude());
                 //keep tracking location to see if user move or not
                 //startAlarmLocationTrigger(Constants.INTERVAL_SLOW_MOVE_IN_MS);
             }
@@ -181,32 +197,30 @@ public class CoreTrackingJobService extends JobIntentService {
     }
 
 
-
     /**
-     *
      * @param location
      * @return true if user move, false if not move or move too slow
      */
-    private boolean checkUserLocationData(Location location){
+    private boolean checkUserLocationData(Location location) {
         float lastLng = SharePref.getLastLngLocation(this);
         float lastLat = SharePref.getLastLatLocation(this);
-        if(lastLat==0||lastLng==0){
-            updateLastLocation((float) location.getLatitude(),(float) location.getLongitude(),System.currentTimeMillis());
+        if (lastLat == 0 || lastLng == 0) {
+            updateLastLocation((float) location.getLatitude(), (float) location.getLongitude(), System.currentTimeMillis());
             return true;
-        }else{
-            float distance = getMetersFromLatLong(lastLat,lastLng, (float) location.getLatitude(), (float) location.getLongitude());
+        } else {
+            float distance = getMetersFromLatLong(lastLat, lastLng, (float) location.getLatitude(), (float) location.getLongitude());
             //seem not move
-            if(distance <= Constants.STAY_DISTANCE_IN_MET){
+            if (distance <= Constants.STAY_DISTANCE_IN_MET) {
                 return false;
-            }else{
+            } else {
                 //user move
-                updateLastLocation((float) location.getLatitude(),(float) location.getLongitude(),System.currentTimeMillis());
+                updateLastLocation((float) location.getLatitude(), (float) location.getLongitude(), System.currentTimeMillis());
                 return true;
             }
         }
     }
 
-    private float getMetersFromLatLong(float lat1, float lng1, float lat2, float lng2){
+    private float getMetersFromLatLong(float lat1, float lng1, float lat2, float lng2) {
         Location loc1 = new Location("");
         loc1.setLatitude(lat1);
         loc1.setLongitude(lng1);
@@ -217,7 +231,7 @@ public class CoreTrackingJobService extends JobIntentService {
         return distanceInMeters;
     }
 
-    private float getMetersFromLatLong(double lat1, double lng1, double lat2, double lng2){
+    private float getMetersFromLatLong(double lat1, double lng1, double lat2, double lng2) {
         Location loc1 = new Location("");
         loc1.setLatitude(lat1);
         loc1.setLongitude(lng1);
@@ -229,14 +243,13 @@ public class CoreTrackingJobService extends JobIntentService {
     }
 
 
-
-    private void updateLastLocation(float lat,float lng,long time){
+    private void updateLastLocation(float lat, float lng, long time) {
         SharePref.setLastLatLocation(this, lat);
         SharePref.setLastLngLocation(this, lng);
         SharePref.setLastMomentGPSNotChange(this, time);
     }
 
-    private void getSnapshotCurrentActivity(Context context, Location location){
+    private void getSnapshotCurrentActivity(Context context, Location location) {
         Awareness.getSnapshotClient(context).getDetectedActivity()
                 .addOnSuccessListener(dar -> {
                     ActivityRecognitionResult arr = dar.getActivityRecognitionResult();
@@ -247,40 +260,40 @@ public class CoreTrackingJobService extends JobIntentService {
                     DetectedActivity probableActivity = arr.getMostProbableActivity();
                     int confidence = probableActivity.getConfidence();
                     String activityStr = probableActivity.toString();
-                    Log.i(TAG,"Activity: " + activityStr
+                    Log.i(TAG, "Activity: " + activityStr
                             + ", Confidence: " + confidence + "/100");
-                    Utils.appendLog(TAG,"I","Get Snapshot Activity: " + activityStr
+                    Utils.appendLog(TAG, "I", "Get Snapshot Activity: " + activityStr
                             + ", Confidence: " + confidence + "/100");
                     //check if STILL now, so cancel tracking
-                    if(probableActivity.getType() == DetectedActivity.STILL && confidence >= 80){
+                    if (probableActivity.getType() == DetectedActivity.STILL && confidence >= 85) {
                         //user still, so cancel tracking location alarm
-                        Utils.appendLog(TAG,"I","User STILL now, Cancel LocationRequestUpdateService");
+                        Utils.appendLog(TAG, "I", "User STILL now, Cancel LocationRequestUpdateService");
                         //cancelLocationTriggerAlarm(context);
                         Intent serviceIntent = new Intent(context, LocationRequestUpdateService.class);
-                        serviceIntent.putExtra("action","STOP");
+                        serviceIntent.putExtra("action", "STOP");
                         startService(serviceIntent);
                         //
-                        updateLastLocation((float) location.getLatitude(),(float) location.getLongitude(),System.currentTimeMillis());
-                    }else{
-                        Utils.appendLog(TAG,"I","User NOT STILL now, keep LocationRequestUpdateService");
+                        updateLastLocation((float) location.getLatitude(), (float) location.getLongitude(), System.currentTimeMillis());
+                    } else {
+                        Utils.appendLog(TAG, "I", "User NOT STILL now, keep check status after interval");
                         //seem user not move, so track again after quite long time
-                        //startAlarmLocationTrigger(Constants.INTERVAL_VERY_SLOW_MOVE_IN_MS);
+                        startAlarmLocationTrigger(Constants.INTERVAL_CHECK_STILL_IN_MS);
                     }
                 })
 
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Could not detect activity: " + e);
-                    Utils.appendLog(TAG,"E","Get Snapshot could not detect activity: " + e);
+                    Utils.appendLog(TAG, "E", "Get Snapshot could not detect activity: " + e);
                 });
     }
 
-    private void processGeoFencing(Location location){
+    private void processGeoFencing(Location location) {
         Thread task = new Thread(() -> {
             List<GeoFencingPlaceModel> geoPointsList = GeofencingDataManagement.Instance().getAllGeoPoints();
-            if(geoPointsList!=null && !geoPointsList.isEmpty()){
-                Utils.appendLog(TAG1,"I","*** Check status all geo point number = "+ geoPointsList.size());
-                for(GeoFencingPlaceModel geoPoint:geoPointsList){
-                    checkGeoPointStatus(geoPoint,location);
+            if (geoPointsList != null && !geoPointsList.isEmpty()) {
+                Utils.appendLog(TAG1, "I", "*** Check status all geo point number = " + geoPointsList.size());
+                for (GeoFencingPlaceModel geoPoint : geoPointsList) {
+                    checkGeoPointStatus(geoPoint, location);
                 }
             }
         });
@@ -288,37 +301,37 @@ public class CoreTrackingJobService extends JobIntentService {
 
     }
 
-    private void checkGeoPointStatus(GeoFencingPlaceModel geoPoint,Location location){
-        Utils.appendLog(TAG1,"I","** Check status geo point "+ geoPoint.getName());
+    private void checkGeoPointStatus(GeoFencingPlaceModel geoPoint, Location location) {
+        Utils.appendLog(TAG1, "I", "** Check status geo point " + geoPoint.getName());
         GeoFencingPlaceStatusModel geoPointStatusModel = GeofencingDataManagement.Instance().getGeoFencingPointOnProgress(geoPoint.getName());
-        float distance = getMetersFromLatLong(location.getLatitude(),location.getLongitude(),geoPoint.getLat(),geoPoint.getLng());
-        if(geoPointStatusModel!=null){
-            Utils.appendLog(TAG1,"I","* Existed this geo point "+ geoPoint.getName() + " - d = " + distance + " - r = " + geoPoint.getRadius() + " - transtion "+ (geoPointStatusModel.getTransition()== Constants.TRANSITION.ENTER?"ENTER":"EXIT"));
+        float distance = getMetersFromLatLong(location.getLatitude(), location.getLongitude(), geoPoint.getLat(), geoPoint.getLng());
+        if (geoPointStatusModel != null) {
+            Utils.appendLog(TAG1, "I", "* Existed this geo point " + geoPoint.getName() + " - d = " + distance + " - r = " + geoPoint.getRadius() + " - transtion " + (geoPointStatusModel.getTransition() == Constants.TRANSITION.ENTER ? "ENTER" : "EXIT"));
             //check if user exit
-            if(distance > geoPoint.getRadius() && geoPointStatusModel.getTransition()==Constants.TRANSITION.ENTER){
+            if (distance > geoPoint.getRadius() && geoPointStatusModel.getTransition() == Constants.TRANSITION.ENTER) {
                 geoPointStatusModel.setTransition(Constants.TRANSITION.EXIT);
                 geoPointStatusModel.setLastActiveTime(System.currentTimeMillis());
                 GeofencingDataManagement.Instance().addOrUpdateGeoOnProgress(geoPointStatusModel);
-                Log.i(TAG1,"Geo Fencing Exit "+ geoPoint.getName());
-                Utils.appendLog(TAG1,"I"," - Geo Fencing Exit "+ geoPoint.getName());
-            }else if(distance <= geoPoint.getRadius() && geoPointStatusModel.getTransition()==Constants.TRANSITION.EXIT){
+                Log.i(TAG1, "Geo Fencing Exit " + geoPoint.getName());
+                Utils.appendLog(TAG1, "I", " - Geo Fencing Exit " + geoPoint.getName());
+            } else if (distance <= geoPoint.getRadius() && geoPointStatusModel.getTransition() == Constants.TRANSITION.EXIT) {
                 //check if user enter
                 geoPointStatusModel.setTransition(Constants.TRANSITION.ENTER);
                 geoPointStatusModel.setLastActiveTime(System.currentTimeMillis());
                 GeofencingDataManagement.Instance().addOrUpdateGeoOnProgress(geoPointStatusModel);
-                Log.i(TAG1,"Geo Fencing Enter "+ geoPoint.getName());
-                Utils.appendLog(TAG1,"I","+ Geo Fencing Enter "+ geoPoint.getName());
+                Log.i(TAG1, "Geo Fencing Enter " + geoPoint.getName());
+                Utils.appendLog(TAG1, "I", "+ Geo Fencing Enter " + geoPoint.getName());
             }
-        }else{
-            Utils.appendLog(TAG1,"I","Not existed this geo point "+ geoPoint.getName() + " - d = " + distance + " - r = " + geoPoint.getRadius());
+        } else {
+            Utils.appendLog(TAG1, "I", "Not existed this geo point " + geoPoint.getName() + " - d = " + distance + " - r = " + geoPoint.getRadius());
             //this is first moment user enter
-            if(distance <= geoPoint.getRadius()){
+            if (distance <= geoPoint.getRadius()) {
                 geoPointStatusModel = new GeoFencingPlaceStatusModel(geoPoint);
                 geoPointStatusModel.setTransition(Constants.TRANSITION.ENTER);
                 geoPointStatusModel.setLastActiveTime(System.currentTimeMillis());
                 GeofencingDataManagement.Instance().addOrUpdateGeoOnProgress(geoPointStatusModel);
-                Log.i(TAG1,"+ Geo Fencing Enter "+ geoPoint.getName());
-                Utils.appendLog(TAG1,"I","Geo Fencing Enter "+ geoPoint.getName());
+                Log.i(TAG1, "+ Geo Fencing Enter " + geoPoint.getName());
+                Utils.appendLog(TAG1, "I", "Geo Fencing Enter " + geoPoint.getName());
             }
         }
 

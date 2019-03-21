@@ -117,13 +117,11 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
     }
 
     private void stopLocationTrackingService(Context context){
-        Log.i(TAG,"USER NOT MOVE SIGNAL");
-        Utils.appendLog(TAG,"I","USER NOT MOVE SIGNAL - Stop LocationRequestUpdateService");
+        Log.i(TAG,"USER STILL SIGNAL");
+        Utils.appendLog(TAG,"I","USER STILL SIGNAL");
         //let location tracking decide to stop tracking or not
         //LocationTrackingJobIntentService.cancelLocationTriggerAlarm(context);
-        Intent serviceIntent = new Intent(context, LocationRequestUpdateService.class);
-        serviceIntent.putExtra("action","STOP");
-        context.startService(serviceIntent);
+
 
     }
 }
