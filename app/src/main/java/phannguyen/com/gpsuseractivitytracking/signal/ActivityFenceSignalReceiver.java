@@ -107,7 +107,7 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
 
     private void startLocationTrackingService(Context context){
         Log.i(TAG,"User MOVE SIGNAL - Start Location Tracking Job IS");
-        Utils.appendLog(TAG,"I","User MOVE SIGNAL - Start Location Tracking Job IS");
+        Utils.appendLog(TAG,"I","User MOVE SIGNAL - Start LocationRequestUpdateService");
         /*Intent serviceIntent = new Intent(context,CoreTrackingJobService.class);
         serviceIntent.putExtra(Constants.SIGNAL_KEY,Constants.SIGNAL.MOVE.toString());
         CoreTrackingJobService.enqueueWork(context,serviceIntent);*/
@@ -118,9 +118,12 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
 
     private void stopLocationTrackingService(Context context){
         Log.i(TAG,"USER NOT MOVE SIGNAL");
-        Utils.appendLog(TAG,"I","USER NOT MOVE SIGNAL");
+        Utils.appendLog(TAG,"I","USER NOT MOVE SIGNAL - Stop LocationRequestUpdateService");
         //let location tracking decide to stop tracking or not
         //LocationTrackingJobIntentService.cancelLocationTriggerAlarm(context);
+        Intent serviceIntent = new Intent(context, LocationRequestUpdateService.class);
+        serviceIntent.putExtra("action","STOP");
+        context.startService(serviceIntent);
 
     }
 }

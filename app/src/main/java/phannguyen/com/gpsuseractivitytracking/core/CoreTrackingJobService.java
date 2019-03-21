@@ -278,6 +278,7 @@ public class CoreTrackingJobService extends JobIntentService {
         Thread task = new Thread(() -> {
             List<GeoFencingPlaceModel> geoPointsList = GeofencingDataManagement.Instance().getAllGeoPoints();
             if(geoPointsList!=null && !geoPointsList.isEmpty()){
+                Utils.appendLog(TAG1,"I","*** Check status all geo point number = "+ geoPointsList.size());
                 for(GeoFencingPlaceModel geoPoint:geoPointsList){
                     checkGeoPointStatus(geoPoint,location);
                 }
@@ -288,32 +289,35 @@ public class CoreTrackingJobService extends JobIntentService {
     }
 
     private void checkGeoPointStatus(GeoFencingPlaceModel geoPoint,Location location){
+        Utils.appendLog(TAG1,"I","** Check status geo point "+ geoPoint.getName());
         GeoFencingPlaceStatusModel geoPointStatusModel = GeofencingDataManagement.Instance().getGeoFencingPointOnProgress(geoPoint.getName());
         float distance = getMetersFromLatLong(location.getLatitude(),location.getLongitude(),geoPoint.getLat(),geoPoint.getLng());
         if(geoPointStatusModel!=null){
+            Utils.appendLog(TAG1,"I","* Existed this geo point "+ geoPoint.getName() + " - d = " + distance + " - r = " + geoPoint.getRadius() + " - transtion "+ (geoPointStatusModel.getTransition()== Constants.TRANSITION.ENTER?"ENTER":"EXIT"));
             //check if user exit
             if(distance > geoPoint.getRadius() && geoPointStatusModel.getTransition()==Constants.TRANSITION.ENTER){
                 geoPointStatusModel.setTransition(Constants.TRANSITION.EXIT);
                 geoPointStatusModel.setLastActiveTime(System.currentTimeMillis());
                 GeofencingDataManagement.Instance().addOrUpdateGeoOnProgress(geoPointStatusModel);
                 Log.i(TAG1,"Geo Fencing Exit "+ geoPoint.getName());
-                Utils.appendLog(TAG1,"I","Geo Fencing Exit "+ geoPoint.getName());
+                Utils.appendLog(TAG1,"I"," - Geo Fencing Exit "+ geoPoint.getName());
             }else if(distance <= geoPoint.getRadius() && geoPointStatusModel.getTransition()==Constants.TRANSITION.EXIT){
                 //check if user enter
                 geoPointStatusModel.setTransition(Constants.TRANSITION.ENTER);
                 geoPointStatusModel.setLastActiveTime(System.currentTimeMillis());
                 GeofencingDataManagement.Instance().addOrUpdateGeoOnProgress(geoPointStatusModel);
                 Log.i(TAG1,"Geo Fencing Enter "+ geoPoint.getName());
-                Utils.appendLog(TAG1,"I","Geo Fencing Enter "+ geoPoint.getName());
+                Utils.appendLog(TAG1,"I","+ Geo Fencing Enter "+ geoPoint.getName());
             }
         }else{
+            Utils.appendLog(TAG1,"I","Not existed this geo point "+ geoPoint.getName() + " - d = " + distance + " - r = " + geoPoint.getRadius());
             //this is first moment user enter
             if(distance <= geoPoint.getRadius()){
                 geoPointStatusModel = new GeoFencingPlaceStatusModel(geoPoint);
                 geoPointStatusModel.setTransition(Constants.TRANSITION.ENTER);
                 geoPointStatusModel.setLastActiveTime(System.currentTimeMillis());
                 GeofencingDataManagement.Instance().addOrUpdateGeoOnProgress(geoPointStatusModel);
-                Log.i(TAG1,"Geo Fencing Enter "+ geoPoint.getName());
+                Log.i(TAG1,"+ Geo Fencing Enter "+ geoPoint.getName());
                 Utils.appendLog(TAG1,"I","Geo Fencing Enter "+ geoPoint.getName());
             }
         }
