@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
@@ -39,6 +40,7 @@ import phannguyen.com.gpsuseractivitytracking.signal.LocationTrackingIntervalWor
 import phannguyen.com.gpsuseractivitytracking.signal.RegisterActivityFenceSignalWorker;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static phannguyen.com.gpsuseractivitytracking.Constants.REGISTER_ACTIVTY_WORK_TAG;
 import static phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker.KEY_RESULT;
 
 public class MainActivity extends AppCompatActivity {
@@ -57,9 +59,9 @@ public class MainActivity extends AppCompatActivity {
             serviceIntent.putExtra("action","START");
             startService(serviceIntent);*/
             //
-            Intent serviceIntent1 = new Intent(MainActivity.this, ActivitiesTransitionRequestUpdateService.class);
+            /*Intent serviceIntent1 = new Intent(MainActivity.this, ActivitiesTransitionRequestUpdateService.class);
             serviceIntent1.putExtra("action","START");
-            startService(serviceIntent1);
+            startService(serviceIntent1);*/
             //
             //register();
             //
@@ -67,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
             //
             //LocationTrackingJobIntentService.enqueueWork(MainActivity.this,new Intent(MainActivity.this,LocationTrackingJobIntentService.class));
             //
-            //applyRegisterActivityFenceSignalWork(REGISTER_ACTIVTY_WORK_TAG);
+            applyRegisterActivityFenceSignalWork(REGISTER_ACTIVTY_WORK_TAG);
             //
             //GeofencingDataManagement.Instance().addGeopointsList(Utils.createListGeoFencingPlaces());
             //
@@ -83,16 +85,16 @@ public class MainActivity extends AppCompatActivity {
             serviceIntent.putExtra("action","STOP");
             startService(serviceIntent);*/
             //
-            Intent serviceIntent1 = new Intent(MainActivity.this,ActivitiesTransitionRequestUpdateService.class);
+            /*Intent serviceIntent1 = new Intent(MainActivity.this,ActivitiesTransitionRequestUpdateService.class);
             serviceIntent1.putExtra("action","STOP");
-            startService(serviceIntent1);
+            startService(serviceIntent1);*/
             //
             //stopGeofencingMonitoring();
             //
             //trackingWorkerByTag(tag);
             //
             //LocationTrackingJobIntentService.cancelLocationTriggerAlarm(MainActivity.this);
-            //cancelWorkerByTag(REGISTER_ACTIVTY_WORK_TAG);
+            cancelWorkerByTag(REGISTER_ACTIVTY_WORK_TAG);
             Toast.makeText(MainActivity.this,"Unregister tracking user activity",Toast.LENGTH_LONG).show();
 
         });
@@ -185,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void applyRegisterActivityFenceSignalWork(String tag){
         PeriodicWorkRequest.Builder registerActivityWorkBuilder =
-                new PeriodicWorkRequest.Builder(RegisterActivityFenceSignalWorker.class, 60,
+                new PeriodicWorkRequest.Builder(RegisterActivityFenceSignalWorker.class, 24,
                         TimeUnit.HOURS);
         PeriodicWorkRequest registerWork = registerActivityWorkBuilder.addTag(tag)
                 .build();
