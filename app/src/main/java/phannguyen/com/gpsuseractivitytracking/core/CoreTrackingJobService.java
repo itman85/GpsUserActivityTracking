@@ -12,7 +12,6 @@ import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
@@ -24,7 +23,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 import phannguyen.com.gpsuseractivitytracking.Constants;
 import phannguyen.com.gpsuseractivitytracking.Utils;
-import phannguyen.com.gpsuseractivitytracking.android7.locationtracking.LocationRequestUpdateService;
+import phannguyen.com.gpsuseractivitytracking.android7.locationtracking.LocationRequestUpdateService1;
 import phannguyen.com.gpsuseractivitytracking.core.storage.SharePref;
 import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceModel;
 import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceStatusModel;
@@ -49,7 +48,7 @@ public class CoreTrackingJobService extends JobIntentService {
     protected void onHandleWork(@NonNull Intent intent) {
         Log.i(TAG, "CoreTrackingLocation job service on handle");
         Utils.appendLog(TAG, "I", "CoreTrackingLocation job service on handle");
-        boolean res = handleLocationIntent(intent);
+        boolean res = handleLocationIntent1(intent);
         if (!res) {
             /*boolean isStartTrackingSignal = handleIntentSignal(intent);
             boolean statusTracking = SharePref.getGpsTrackingStatus(this);
@@ -81,6 +80,19 @@ public class CoreTrackingJobService extends JobIntentService {
         if (LocationResult.hasResult(intent)) {
             LocationResult locationResult = LocationResult.extractResult(intent);
             Location location = locationResult.getLastLocation();
+            if (location != null) {
+                processLocationData(location);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean handleLocationIntent1(Intent intent) {
+        if (LocationResult.hasResult(intent)) {
+            Location location = intent.getParcelableExtra("com.google.android.gms.location.EXTRA_LOCATION_RESULT");
+           // LocationResult locationResult = LocationResult.extractResult(intent);
+           // Location location = locationResult.getLastLocation();
             if (location != null) {
                 processLocationData(location);
                 return true;
@@ -269,7 +281,7 @@ public class CoreTrackingJobService extends JobIntentService {
                         //user still, so cancel tracking location alarm
                         Utils.appendLog(TAG, "I", "User STILL now, Cancel LocationRequestUpdateService");
                         //cancelLocationTriggerAlarm(context);
-                        Intent serviceIntent = new Intent(context, LocationRequestUpdateService.class);
+                        Intent serviceIntent = new Intent(context, LocationRequestUpdateService1.class);
                         serviceIntent.putExtra("action", "STOP");
                         startService(serviceIntent);
                         //

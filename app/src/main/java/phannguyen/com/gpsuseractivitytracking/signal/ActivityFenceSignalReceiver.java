@@ -9,7 +9,7 @@ import android.util.Log;
 import com.google.android.gms.awareness.fence.FenceState;
 
 import phannguyen.com.gpsuseractivitytracking.Utils;
-import phannguyen.com.gpsuseractivitytracking.android7.locationtracking.LocationRequestUpdateService;
+import phannguyen.com.gpsuseractivitytracking.android7.locationtracking.LocationRequestUpdateService1;
 
 import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_FENCE_KEY;
 import static phannguyen.com.gpsuseractivitytracking.PendingIntentUtils.ACTIVITY_SIGNAL_RECEIVER_ACTION;
@@ -111,7 +111,7 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
         /*Intent serviceIntent = new Intent(context,CoreTrackingJobService.class);
         serviceIntent.putExtra(Constants.SIGNAL_KEY,Constants.SIGNAL.MOVE.toString());
         CoreTrackingJobService.enqueueWork(context,serviceIntent);*/
-        Intent serviceIntent = new Intent(context, LocationRequestUpdateService.class);
+        Intent serviceIntent = new Intent(context, LocationRequestUpdateService1.class);
         serviceIntent.putExtra("action","START");
         context.startService(serviceIntent);
     }
@@ -121,7 +121,5 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
         Utils.appendLog(TAG,"I","USER STILL SIGNAL");
         //let location tracking decide to stop tracking or not
         //LocationTrackingJobIntentService.cancelLocationTriggerAlarm(context);
-
-
     }
 }
