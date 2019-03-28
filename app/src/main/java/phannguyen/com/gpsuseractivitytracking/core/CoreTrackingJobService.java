@@ -197,7 +197,7 @@ public class CoreTrackingJobService extends JobIntentService {
             //check if user dont move for long time => user STILL
             if (System.currentTimeMillis() - lastStayMoment >= Constants.TIMEOUT_STAY_LOCATION) {
                 Log.i(TAG, "***User Stay for certant time Lat = " + location.getLatitude() + " - Lng= " + location.getLongitude());
-                Utils.appendLog(TAG, "I", "***User stay for certant time Lat = " + location.getLatitude() + " - Lng= " + location.getLongitude());
+                Utils.appendLog(TAG, "I", "***User stay for certain time Lat = " + location.getLatitude() + " - Lng= " + location.getLongitude());
                 getSnapshotCurrentActivity(this, location);
             } else {
                 Log.i(TAG, "***User move slowly or stay a bit Lat = " + location.getLatitude() + " - Lng= " + location.getLongitude());
@@ -277,7 +277,7 @@ public class CoreTrackingJobService extends JobIntentService {
                     Utils.appendLog(TAG, "I", "Get Snapshot Activity: " + activityStr
                             + ", Confidence: " + confidence + "/100");
                     //check if STILL now, so cancel tracking
-                    if (probableActivity.getType() == DetectedActivity.STILL && confidence >= 85) {
+                    if (probableActivity.getType() == DetectedActivity.STILL && confidence >= 90) {
                         //user still, so cancel tracking location alarm
                         Utils.appendLog(TAG, "I", "User STILL now, Cancel LocationRequestUpdateService");
                         //cancelLocationTriggerAlarm(context);
