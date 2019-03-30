@@ -1,6 +1,7 @@
 package phannguyen.com.gpsuseractivitytracking.core;
 
 import android.annotation.SuppressLint;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -22,8 +23,8 @@ import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 import phannguyen.com.gpsuseractivitytracking.Constants;
+import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
 import phannguyen.com.gpsuseractivitytracking.Utils;
-import phannguyen.com.gpsuseractivitytracking.android7.locationtracking.LocationRequestUpdateService1;
 import phannguyen.com.gpsuseractivitytracking.core.storage.SharePref;
 import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceModel;
 import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceStatusModel;
@@ -48,7 +49,7 @@ public class CoreTrackingJobService extends JobIntentService {
     protected void onHandleWork(@NonNull Intent intent) {
         Log.i(TAG, "CoreTrackingLocation job service on handle");
         Utils.appendLog(TAG, "I", "CoreTrackingLocation job service on handle");
-        boolean res = handleLocationIntent1(intent);
+        boolean res = handleLocationIntent(intent);
         if (!res) {
             /*boolean isStartTrackingSignal = handleIntentSignal(intent);
             boolean statusTracking = SharePref.getGpsTrackingStatus(this);
@@ -58,6 +59,7 @@ public class CoreTrackingJobService extends JobIntentService {
                 SharePref.setGpsTrackingStatus(this, true);
             */
             //
+            Utils.appendLog(TAG,"I","Get fused location now");
             FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
             mFusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
                 if (location != null) {
@@ -81,6 +83,7 @@ public class CoreTrackingJobService extends JobIntentService {
             LocationResult locationResult = LocationResult.extractResult(intent);
             Location location = locationResult.getLastLocation();
             if (location != null) {
+                Utils.appendLog(TAG,"I","Receive location intent and process now");
                 processLocationData(location);
                 return true;
             }
@@ -94,6 +97,7 @@ public class CoreTrackingJobService extends JobIntentService {
            // LocationResult locationResult = LocationResult.extractResult(intent);
            // Location location = locationResult.getLastLocation();
             if (location != null) {
+                Utils.appendLog(TAG,"I","CoreTrackingLocation receive location intent and process now");
                 processLocationData(location);
                 return true;
             }
@@ -281,9 +285,13 @@ public class CoreTrackingJobService extends JobIntentService {
                         //user still, so cancel tracking location alarm
                         Utils.appendLog(TAG, "I", "User STILL now, Cancel LocationRequestUpdateService");
                         //cancelLocationTriggerAlarm(context);
-                        Intent serviceIntent = new Intent(context, LocationRequestUpdateService1.class);
+                        /*Intent serviceIntent = new Intent(context, LocationRequestUpdateService1.class);
                         serviceIntent.putExtra("action", "STOP");
-                        startService(serviceIntent);
+                        startService(serviceIntent);*/
+                        //remove location request update by pending intent
+                        SharePref.setLocationRequestUpdateStatus(context, false);
+                        PendingIntent pendingIntent = PendingIntentUtils.createLocationTrackingPendingIntent(this);
+                        LocationServices.getFusedLocationProviderClient(context).removeLocationUpdates(pendingIntent);
                         //
                         updateLastLocation((float) location.getLatitude(), (float) location.getLongitude(), System.currentTimeMillis());
                     } else {

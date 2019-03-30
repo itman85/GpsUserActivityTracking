@@ -66,5 +66,16 @@ public class SharePref {
         return sharedPreferences.getInt("lastSpeedInterval",0);
     }
 
+    public static void setLocationRequestUpdateStatus(Context context, boolean status){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("location_request_update", status);
+        editor.apply();
+    }
+
+    public static boolean getLocationRequestUpdateStatus(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getBoolean("location_request_update",false);
+    }
 
 }

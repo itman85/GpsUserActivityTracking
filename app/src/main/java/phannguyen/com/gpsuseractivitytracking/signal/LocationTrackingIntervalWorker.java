@@ -24,7 +24,7 @@ public class LocationTrackingIntervalWorker extends Worker {
     @Override
     public Result doWork() {
         Log.i(TAG,"Location Tracking Interval Worker Trigger");
-        Utils.appendLog(TAG,"I","Location Tracking Interval Worker Trigger");
+        Utils.appendLog(TAG,"I","LocationIntervalWorker For Recheck Location & User Activity Status");
         CoreTrackingJobService.enqueueWork(getApplicationContext(),new Intent(getApplicationContext(),CoreTrackingJobService.class));
         Data output = new Data.Builder()
                 .putBoolean(KEY_RESULT, true)

@@ -3,23 +3,19 @@ package phannguyen.com.gpsuseractivitytracking.android7.locationtracking;
 import android.Manifest;
 import android.app.IntentService;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
 import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
 import phannguyen.com.gpsuseractivitytracking.Utils;
-import phannguyen.com.gpsuseractivitytracking.core.CoreTrackingJobService;
 
 import static phannguyen.com.gpsuseractivitytracking.Constants.FASTEST_INTERVAL;
 import static phannguyen.com.gpsuseractivitytracking.Constants.UPDATE_INTERVAL;
@@ -29,7 +25,6 @@ public class LocationRequestUpdateService extends IntentService {
     private FusedLocationProviderClient mFusedLocationClient;
     private LocationRequest mLocationRequest;
     private Context mContext;
-    private MyLocationUpdateReceiver myLocationUpdateReceiver;
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
      */
@@ -87,19 +82,5 @@ public class LocationRequestUpdateService extends IntentService {
         mFusedLocationClient.removeLocationUpdates(pendingIntent);
     }
 
-    private class MyLocationUpdateReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (LocationResult.hasResult(intent)) {
-                CoreTrackingJobService.enqueueWork(context,intent);
-                LocationResult locationResult = LocationResult.extractResult(intent);
-                Location location = locationResult.getLastLocation();
-                if (location != null) {
-                    // use the Location
-                    Log.i(TAG,"***Last location is Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
-                    Utils.appendLog("MyLocationUpdateReceiver","I","***Last location is Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
-                }
-            }
-        }
-    }
+
 }

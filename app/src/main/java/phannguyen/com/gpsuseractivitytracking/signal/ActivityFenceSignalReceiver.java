@@ -1,17 +1,26 @@
 package phannguyen.com.gpsuseractivitytracking.signal;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.android.gms.awareness.fence.FenceState;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 
+import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
 import phannguyen.com.gpsuseractivitytracking.Utils;
-import phannguyen.com.gpsuseractivitytracking.android7.locationtracking.LocationRequestUpdateService1;
+import phannguyen.com.gpsuseractivitytracking.core.storage.SharePref;
 
 import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_FENCE_KEY;
+import static phannguyen.com.gpsuseractivitytracking.Constants.FASTEST_INTERVAL;
+import static phannguyen.com.gpsuseractivitytracking.Constants.UPDATE_INTERVAL;
 import static phannguyen.com.gpsuseractivitytracking.PendingIntentUtils.ACTIVITY_SIGNAL_RECEIVER_ACTION;
 
 public class ActivityFenceSignalReceiver extends BroadcastReceiver {
@@ -111,9 +120,10 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
         /*Intent serviceIntent = new Intent(context,CoreTrackingJobService.class);
         serviceIntent.putExtra(Constants.SIGNAL_KEY,Constants.SIGNAL.MOVE.toString());
         CoreTrackingJobService.enqueueWork(context,serviceIntent);*/
-        Intent serviceIntent = new Intent(context, LocationRequestUpdateService1.class);
+        /*Intent serviceIntent = new Intent(context, LocationRequestUpdateService1.class);
         serviceIntent.putExtra("action","START");
-        context.startService(serviceIntent);
+        context.startService(serviceIntent);*/
+        createLocationRequestUpdate(context);
     }
 
     private void stopLocationTrackingService(Context context){
@@ -121,5 +131,30 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
         Utils.appendLog(TAG,"I","USER STILL SIGNAL");
         //let location tracking decide to stop tracking or not
         //LocationTrackingJobIntentService.cancelLocationTriggerAlarm(context);
+    }
+
+    private void createLocationRequestUpdate(Context context){
+        FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+
+        LocationRequest mLocationRequest = new LocationRequest();
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "No location permission granted");
+            Utils.appendLog(TAG,"E","No location permission granted");
+        } else {
+            //check if not request update location yet
+            if(!SharePref.getLocationRequestUpdateStatus(context)) {
+                Log.i(TAG, "Request location update");
+                Utils.appendLog(TAG, "I", "Request location update now");
+                SharePref.setLocationRequestUpdateStatus(context, true);
+                mFusedLocationClient.requestLocationUpdates(mLocationRequest, PendingIntentUtils.createLocationTrackingPendingIntent(context));
+            }
+        }
+
+
     }
 }
