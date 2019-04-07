@@ -24,11 +24,13 @@ public class LocationTrackingIntervalWorker extends Worker {
     @Override
     public Result doWork() {
         Log.i(TAG,"Location Tracking Interval Worker Trigger");
+        Utils.appendLog("WorkerQueue", "I", "Worker do");
         Utils.appendLog(TAG,"I","LocationIntervalWorker For Recheck Location & User Activity Status");
         CoreTrackingJobService.enqueueWork(getApplicationContext(),new Intent(getApplicationContext(),CoreTrackingJobService.class));
         Data output = new Data.Builder()
                 .putBoolean(KEY_RESULT, true)
                 .build();
+
         return Result.success(output);
     }
 }

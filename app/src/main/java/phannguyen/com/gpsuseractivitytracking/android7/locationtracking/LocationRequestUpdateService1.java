@@ -28,6 +28,9 @@ import phannguyen.com.gpsuseractivitytracking.core.CoreTrackingJobService;
 import static phannguyen.com.gpsuseractivitytracking.Constants.FASTEST_INTERVAL;
 import static phannguyen.com.gpsuseractivitytracking.Constants.UPDATE_INTERVAL;
 
+/**
+ * this work stable in im app
+ */
 public class LocationRequestUpdateService1 extends Service {
     private static final String TAG = "LocationReqUpdateSv1";
     private FusedLocationProviderClient mFusedLocationClient;

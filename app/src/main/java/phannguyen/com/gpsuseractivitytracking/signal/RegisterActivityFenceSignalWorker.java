@@ -42,7 +42,7 @@ public class RegisterActivityFenceSignalWorker extends Worker {
     public Result doWork() {
         Log.i(TAG,"Work time "+ count + " at " +System.currentTimeMillis());
         setupFences();
-        setupGeoFencing();
+        //setupGeoFencing();//this will affect detect move
         Data output = new Data.Builder()
                 .putInt(KEY_RESULT, count)
                 .build();

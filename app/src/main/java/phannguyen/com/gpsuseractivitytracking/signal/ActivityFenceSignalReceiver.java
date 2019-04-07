@@ -123,6 +123,8 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
         /*Intent serviceIntent = new Intent(context, LocationRequestUpdateService1.class);
         serviceIntent.putExtra("action","START");
         context.startService(serviceIntent);*/
+
+        //start request update location whenever user move
         createLocationRequestUpdate(context);
     }
 
@@ -134,13 +136,6 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
     }
 
     private void createLocationRequestUpdate(Context context){
-        FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
-
-        LocationRequest mLocationRequest = new LocationRequest();
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(UPDATE_INTERVAL);
-        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
-
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Log.e(TAG, "No location permission granted");
@@ -148,10 +143,18 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
         } else {
             //check if not request update location yet
             if(!SharePref.getLocationRequestUpdateStatus(context)) {
+                FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+
+                LocationRequest mLocationRequest = new LocationRequest();
+                mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                mLocationRequest.setInterval(UPDATE_INTERVAL);
+                mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
                 Log.i(TAG, "Request location update");
                 Utils.appendLog(TAG, "I", "Request location update now");
                 SharePref.setLocationRequestUpdateStatus(context, true);
                 mFusedLocationClient.requestLocationUpdates(mLocationRequest, PendingIntentUtils.createLocationTrackingPendingIntent(context));
+            }else {
+                Utils.appendLog(TAG, "I", "Request location update still alive, skip now");
             }
         }
 

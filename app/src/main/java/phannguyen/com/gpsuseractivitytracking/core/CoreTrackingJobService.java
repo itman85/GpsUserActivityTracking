@@ -143,6 +143,7 @@ public class CoreTrackingJobService extends JobIntentService {
                         .build();
         //WorkManager.getInstance().enqueue(locationIntervalWork);
         WorkManager.getInstance().enqueueUniqueWork(Constants.LOCATION_TRACKING_INTERVAL_WORK_UNIQUE_NAME, ExistingWorkPolicy.KEEP, locationIntervalWork);
+        Utils.appendLog("WorkerQueue", "I", "Enqueue delay "+ (delayInMs/1000));
        /* AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         PendingIntent pendingIntent = PendingIntentUtils.getLocationTriggerAlarmPendingIntent(this);
         long triggerMoment = System.currentTimeMillis()+delayInMs;
@@ -191,11 +192,13 @@ public class CoreTrackingJobService extends JobIntentService {
 
     private void processLocationData(Location location) {
         boolean isMove = checkUserLocationData(location);
+        Utils.appendLog("LocationData", "I", "Location Lat = " + location.getLatitude() + " - Lng= " + location.getLongitude());
         //processGeoFencing(location);
         if (isMove) {
             Log.i(TAG, "***User moving Lat = " + location.getLatitude() + " - Lng= " + location.getLongitude());
             Utils.appendLog(TAG, "I", "***User moving Lat = " + location.getLatitude() + " - Lng= " + location.getLongitude());
-            //startAlarmLocationTrigger(Constants.INTERVAL_FAST_MOVE_IN_MS);
+            //check if location request update still alive, then start alarm
+            startAlarmLocationTrigger(Constants.INTERVAL_SLOW_MOVE_IN_MS);
         } else {
             long lastStayMoment = SharePref.getLastMomentGPSNotChange(this);
             //check if user dont move for long time => user STILL
@@ -206,8 +209,8 @@ public class CoreTrackingJobService extends JobIntentService {
             } else {
                 Log.i(TAG, "***User move slowly or stay a bit Lat = " + location.getLatitude() + " - Lng= " + location.getLongitude());
                 Utils.appendLog(TAG, "I", "***User  move slowly or stay a bit Lat = " + location.getLatitude() + " - Lng= " + location.getLongitude());
-                //keep tracking location to see if user move or not
-                //startAlarmLocationTrigger(Constants.INTERVAL_SLOW_MOVE_IN_MS);
+                //check if location request update still alive, then start alarm
+                startAlarmLocationTrigger(Constants.INTERVAL_VERY_SLOW_MOVE_IN_MS);
             }
         }
     }
@@ -289,11 +292,14 @@ public class CoreTrackingJobService extends JobIntentService {
                         serviceIntent.putExtra("action", "STOP");
                         startService(serviceIntent);*/
                         //remove location request update by pending intent
-                        SharePref.setLocationRequestUpdateStatus(context, false);
-                        PendingIntent pendingIntent = PendingIntentUtils.createLocationTrackingPendingIntent(this);
-                        LocationServices.getFusedLocationProviderClient(context).removeLocationUpdates(pendingIntent);
+                        if(SharePref.getLocationRequestUpdateStatus(context)) {
+                            SharePref.setLocationRequestUpdateStatus(context, false);
+                            PendingIntent pendingIntent = PendingIntentUtils.createLocationTrackingPendingIntent(this);
+                            LocationServices.getFusedLocationProviderClient(context).removeLocationUpdates(pendingIntent);
+                        }
                         //
                         updateLastLocation((float) location.getLatitude(), (float) location.getLongitude(), System.currentTimeMillis());
+                        Utils.appendLog("LocationData", "I", "STOP at location Lat = " + location.getLatitude() + " - Lng= " + location.getLongitude());
                     } else {
                         Utils.appendLog(TAG, "I", "User NOT STILL now, keep check status after interval");
                         //seem user not move, so track again after quite long time
