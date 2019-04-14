@@ -16,6 +16,7 @@ import com.google.android.gms.location.LocationServices;
 
 import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
 import phannguyen.com.gpsuseractivitytracking.Utils;
+import phannguyen.com.gpsuseractivitytracking.android7.locationtracking.LocationRequestUpdateService1;
 import phannguyen.com.gpsuseractivitytracking.core.storage.SharePref;
 
 import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_FENCE_KEY;
@@ -120,12 +121,12 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
         /*Intent serviceIntent = new Intent(context,CoreTrackingJobService.class);
         serviceIntent.putExtra(Constants.SIGNAL_KEY,Constants.SIGNAL.MOVE.toString());
         CoreTrackingJobService.enqueueWork(context,serviceIntent);*/
-        /*Intent serviceIntent = new Intent(context, LocationRequestUpdateService1.class);
+        Intent serviceIntent = new Intent(context, LocationRequestUpdateService1.class);
         serviceIntent.putExtra("action","START");
-        context.startService(serviceIntent);*/
+        context.startService(serviceIntent);
 
         //start request update location whenever user move
-        createLocationRequestUpdate(context);
+        //createLocationRequestUpdate(context);
     }
 
     private void stopLocationTrackingService(Context context){

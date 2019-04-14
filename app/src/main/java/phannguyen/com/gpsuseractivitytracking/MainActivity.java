@@ -28,14 +28,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
-import phannguyen.com.gpsuseractivitytracking.geofencing.GeofencingDataManagement;
 import phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker;
-import phannguyen.com.gpsuseractivitytracking.signal.ActivitiesTransitionRequestUpdateService;
 import phannguyen.com.gpsuseractivitytracking.signal.LocationTrackingIntervalWorker;
 import phannguyen.com.gpsuseractivitytracking.signal.RegisterActivityFenceSignalWorker;
 
@@ -187,8 +184,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void applyRegisterActivityFenceSignalWork(String tag){
         PeriodicWorkRequest.Builder registerActivityWorkBuilder =
-                new PeriodicWorkRequest.Builder(RegisterActivityFenceSignalWorker.class, 24,
-                        TimeUnit.HOURS);
+                new PeriodicWorkRequest.Builder(RegisterActivityFenceSignalWorker.class, 1440,
+                        TimeUnit.MINUTES);
         PeriodicWorkRequest registerWork = registerActivityWorkBuilder.addTag(tag)
                 .build();
         WorkManager.getInstance().enqueue(registerWork);

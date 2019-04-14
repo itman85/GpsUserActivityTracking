@@ -123,7 +123,7 @@ public class LocationRequestUpdateService1 extends Service {
             CoreTrackingJobService.enqueueWork(this,intent);
             // use the Location
             Log.i(TAG,"***Last location is Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
-            Utils.appendLog("MyLocationUpdateReceiver","I","***Last location is Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
+            Utils.appendLog(TAG,"I","***Last location is Lat = "+location.getLatitude() + " - Lng= "+location.getLongitude());
         }
 
     }
