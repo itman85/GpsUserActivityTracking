@@ -1,7 +1,6 @@
 package phannguyen.com.gpsuseractivitytracking.core;
 
 import android.annotation.SuppressLint;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -23,8 +22,8 @@ import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 import phannguyen.com.gpsuseractivitytracking.Constants;
-import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
 import phannguyen.com.gpsuseractivitytracking.Utils;
+import phannguyen.com.gpsuseractivitytracking.android7.locationtracking.LocationRequestUpdateService1;
 import phannguyen.com.gpsuseractivitytracking.core.storage.SharePref;
 import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceModel;
 import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceStatusModel;
@@ -166,10 +165,8 @@ public class CoreTrackingJobService extends JobIntentService {
 
     private static void cancelLocationTriggerAlarm(Context context) {
         Log.i(TAG, "Cancel Location Trigger Interval Worker");
-        //Utils.appendLog(TAG,"I","Cancel Location Trigger Alarm");
+        Utils.appendLog(TAG,"I","Cancel Location Trigger worker");
         SharePref.setGpsTrackingStatus(context, false);
-        //AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        //alarmManager.cancel(PendingIntentUtils.getLocationTriggerAlarmPendingIntent(context));
         WorkManager.getInstance().cancelUniqueWork(Constants.LOCATION_TRACKING_INTERVAL_WORK_UNIQUE_NAME);
     }
 
@@ -287,16 +284,18 @@ public class CoreTrackingJobService extends JobIntentService {
                     if (probableActivity.getType() == DetectedActivity.STILL && confidence >= 90) {
                         //user still, so cancel tracking location alarm
                         Utils.appendLog(TAG, "I", "User STILL now, Cancel LocationRequestUpdateService");
-                        //cancelLocationTriggerAlarm(context);
-                        /*Intent serviceIntent = new Intent(context, LocationRequestUpdateService1.class);
+                        //stop service1
+                        cancelLocationTriggerAlarm(context);
+                        Intent serviceIntent = new Intent(context, LocationRequestUpdateService1.class);
                         serviceIntent.putExtra("action", "STOP");
-                        startService(serviceIntent);*/
-                        //remove location request update by pending intent
-                        if(SharePref.getLocationRequestUpdateStatus(context)) {
+                        startService(serviceIntent);
+
+                        //remove location request update by pending intent in signal
+                        /*if(SharePref.getLocationRequestUpdateStatus(context)) {
                             SharePref.setLocationRequestUpdateStatus(context, false);
                             PendingIntent pendingIntent = PendingIntentUtils.createLocationTrackingPendingIntent(this);
                             LocationServices.getFusedLocationProviderClient(context).removeLocationUpdates(pendingIntent);
-                        }
+                        }*/
                         //
                         updateLastLocation((float) location.getLatitude(), (float) location.getLongitude(), System.currentTimeMillis());
                         Utils.appendLog("LocationData", "I", "STOP at location Lat = " + location.getLatitude() + " - Lng= " + location.getLongitude());

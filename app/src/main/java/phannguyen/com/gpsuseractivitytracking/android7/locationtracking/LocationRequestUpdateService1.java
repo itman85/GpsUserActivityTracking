@@ -24,6 +24,7 @@ import com.google.android.gms.location.LocationServices;
 
 import phannguyen.com.gpsuseractivitytracking.Utils;
 import phannguyen.com.gpsuseractivitytracking.core.CoreTrackingJobService;
+import phannguyen.com.gpsuseractivitytracking.core.storage.SharePref;
 
 import static phannguyen.com.gpsuseractivitytracking.Constants.FASTEST_INTERVAL;
 import static phannguyen.com.gpsuseractivitytracking.Constants.UPDATE_INTERVAL;
@@ -72,7 +73,20 @@ public class LocationRequestUpdateService1 extends Service {
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
         Log.i(TAG, "Service onStartCommand");
         Utils.appendLog(TAG,"I","Service onStartCommand");
-        if(intent.hasExtra("action") && "START".equals(intent.getStringExtra("action"))) {
+        boolean isOnTracking = false;
+        //for case this service is killed by OS, it will restart with null intent, then request location update again
+        if(intent==null){
+            isOnTracking = SharePref.getLocationRequestUpdateStatus(this);
+            if(isOnTracking){
+                isStartTracking  = false;//restart request update location
+                Utils.appendLog(TAG,"I","Service restart Null Intent, restart update location");
+            }else{
+                //no location request update live now, so kill this service
+                Utils.appendLog(TAG,"I","Service restart Null Intent, Stop now");
+                stopSelf();//https://stackoverflow.com/questions/8279199/can-i-call-stopself-in-service-onstartcommand
+            }
+        }
+        if(isOnTracking || (intent!=null && intent.hasExtra("action") && "START".equals(intent.getStringExtra("action")))) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                     && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 Log.e(TAG, "No location permission granted");
@@ -80,15 +94,18 @@ public class LocationRequestUpdateService1 extends Service {
             } else {
                 Log.i(TAG, "Request location update");
                 Utils.appendLog(TAG,"I","Request location update now");
-                if(!isStartTracking)
+                if(!isStartTracking) {
                     mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
-                isStartTracking = true;
+                    isStartTracking = true;
+                    SharePref.setLocationRequestUpdateStatus(this, true);
+                }
             }
-        }else if(intent.hasExtra("action") && "STOP".equals(intent.getStringExtra("action"))){
+        }else if(intent!=null && intent.hasExtra("action") && "STOP".equals(intent.getStringExtra("action"))){
             Log.e(TAG, "*** Remove Request location update");
             Utils.appendLog(TAG,"I","*** Remove Request location update");
             removeLocationRequestUpdate();
             isStartTracking = false;
+            stopSelf();
         }
         return START_STICKY;
     }
@@ -98,6 +115,7 @@ public class LocationRequestUpdateService1 extends Service {
         super.onDestroy();
         Log.i(TAG, "Location Request Update Service Destroy");
         Utils.appendLog(TAG,"I","**** Location Request Update Service Destroy");
+        SharePref.setLocationRequestUpdateStatus(this, false);
         mServiceHandler.removeCallbacksAndMessages(null);
        // LocalBroadcastManager.getInstance(this).unregisterReceiver(myLocationUpdateReceiver);
     }
@@ -112,7 +130,6 @@ public class LocationRequestUpdateService1 extends Service {
         //PendingIntent pendingIntent = PendingIntentUtils.createLocationTrackingPendingIntent(this);
         //mFusedLocationClient.removeLocationUpdates(pendingIntent);
         mFusedLocationClient.removeLocationUpdates(mLocationCallback);
-        stopSelf();
     }
 
     private void onNewLocation(Location location) {
