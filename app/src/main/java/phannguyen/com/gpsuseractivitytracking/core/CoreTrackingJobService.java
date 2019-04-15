@@ -78,7 +78,7 @@ public class CoreTrackingJobService extends JobIntentService {
         }
     }
 
-    private boolean handleLocationIntent(Intent intent) {
+   /* private boolean handleLocationIntent(Intent intent) {
         if (LocationResult.hasResult(intent)) {
             LocationResult locationResult = LocationResult.extractResult(intent);
             Location location = locationResult.getLastLocation();
@@ -89,9 +89,9 @@ public class CoreTrackingJobService extends JobIntentService {
             }
         }
         return false;
-    }
+    }*/
 
-    private boolean handleLocationIntent1(Intent intent) {
+    private boolean handleLocationIntent(Intent intent) {
         if (LocationResult.hasResult(intent)) {
             Location location = intent.getParcelableExtra("com.google.android.gms.location.EXTRA_LOCATION_RESULT");
            // LocationResult locationResult = LocationResult.extractResult(intent);
