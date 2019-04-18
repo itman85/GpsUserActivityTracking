@@ -107,6 +107,12 @@ public class MainActivity extends AppCompatActivity {
             askIgnoreBatteryPermission();
         });
 
+        Button registerBtn = findViewById(R.id.registerBtn);
+        registerBtn.setOnClickListener(v -> {
+            Intent serviceIntent = new Intent(MainActivity.this, RegisterReceiverService.class);
+            startService(serviceIntent);
+        });
+
         List<String> permissionList = new ArrayList<>();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M

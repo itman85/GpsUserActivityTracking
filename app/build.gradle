@@ -21,6 +21,18 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    flavorDimensions "mode"
+    productFlavors {
+        tracking{
+            applicationId "phannguyen.com.gpsuseractivitytracking"
+            dimension "mode"
+        }
+        register {
+            minSdkVersion 21
+            applicationId 'phannguyen.com.testregister'
+            dimension "mode"
+        }
+    }
 }
 
 dependencies {
