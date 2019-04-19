@@ -19,14 +19,15 @@ import phannguyen.com.gpsuseractivitytracking.Utils;
 import phannguyen.com.gpsuseractivitytracking.android7.locationtracking.LocationRequestUpdateService1;
 import phannguyen.com.gpsuseractivitytracking.core.storage.SharePref;
 
-import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_FENCE_KEY;
+import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_MOVE_FENCE_KEY;
+import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_STILL_FENCE_KEY;
 import static phannguyen.com.gpsuseractivitytracking.Constants.FASTEST_INTERVAL;
 import static phannguyen.com.gpsuseractivitytracking.Constants.UPDATE_INTERVAL;
 import static phannguyen.com.gpsuseractivitytracking.PendingIntentUtils.ACTIVITY_SIGNAL_RECEIVER_ACTION;
 
 public class ActivityFenceSignalReceiver extends BroadcastReceiver {
-    private static final String TAG = "ActivitySignalRc";
-    private static final String TAG1 = "GeoFencingSignalRc";
+    private static final String TAG = "StillActivitySignalRc";
+    private static final String TAG1 = "MoveActivitySignalRc";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -41,20 +42,19 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
         // The state information for the given fence is em
         FenceState fenceState = FenceState.extract(intent);
 
-        if (TextUtils.equals(fenceState.getFenceKey(), ACTIVITY_FENCE_KEY)) {
+        if (TextUtils.equals(fenceState.getFenceKey(), ACTIVITY_STILL_FENCE_KEY)) {
             //String fenceStateStr;
             switch (fenceState.getCurrentState()) {
                 case FenceState.TRUE:
-                    stopLocationTrackingService(context);
+                    stopLocationTrackingService(context,TAG);
                     break;
                 case FenceState.FALSE:
-                    startLocationTrackingService(context);
-                    break;
-                case FenceState.UNKNOWN:
-                    stopLocationTrackingService(context);
+                    startLocationTrackingService(context,TAG);
                     break;
                 default:
-                    stopLocationTrackingService(context);
+                    Log.i(TAG,"User UNKNOWN Activity");
+                    Utils.appendLog(TAG,"I","User UNKNOWN Activity");
+                    break;
             }
             //Log.i(TAG,"Fence state: " + fenceStateStr);
             //Utils.appendLog(TAG,"I","Fence state: " + fenceStateStr);
@@ -94,30 +94,25 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
                     Log.i(TAG,"User unknown enter location geo fencing");
                     Utils.appendLog(TAG,"I","User unknown enter location geo fencing");
             }
-        }*/else {
+        }*/else if(TextUtils.equals(fenceState.getFenceKey(), ACTIVITY_MOVE_FENCE_KEY)) {
             switch (fenceState.getCurrentState()) {
                 case FenceState.TRUE:
-                    Log.i(TAG1,"******* User "+fenceState.getFenceKey());
-                    Utils.appendLog(TAG1,"I","******* User "+fenceState.getFenceKey());
+                    startLocationTrackingService(context,TAG1);
                     break;
                 case FenceState.FALSE:
-                    Log.i(TAG1,"User NOT "+fenceState.getFenceKey());
-                    //Utils.appendLog(TAG1,"I","User NOT "+fenceState.getFenceKey());
-                    break;
-                case FenceState.UNKNOWN:
-                    Log.i(TAG1,"User UNKNOWN "+fenceState.getFenceKey());
-                    //Utils.appendLog(TAG1,"I","User UNKNOWN "+fenceState.getFenceKey());
+                    stopLocationTrackingService(context,TAG1);
                     break;
                 default:
-                    Log.i(TAG1,"User _UNKNOWN "+fenceState.getFenceKey());
-                    //Utils.appendLog(TAG1,"I","User _UNKNOWN "+fenceState.getFenceKey());
+                    Log.i(TAG1,"User UNKNOWN Activity");
+                    Utils.appendLog(TAG1,"I","User UNKNOWN Activity");
+                    break;
             }
         }
     }
 
-    private void startLocationTrackingService(Context context){
-        Log.i(TAG,"User MOVE SIGNAL - Start Location Tracking Job IS");
-        Utils.appendLog(TAG,"I","User MOVE SIGNAL - Start LocationRequestUpdateService");
+    private void startLocationTrackingService(Context context,String tag){
+        Log.i(tag,"User MOVE SIGNAL - Start Location Tracking Job IS");
+        Utils.appendLog(tag,"I","User MOVE SIGNAL - Start LocationRequestUpdateService");
         /*Intent serviceIntent = new Intent(context,CoreTrackingJobService.class);
         serviceIntent.putExtra(Constants.SIGNAL_KEY,Constants.SIGNAL.MOVE.toString());
         CoreTrackingJobService.enqueueWork(context,serviceIntent);*/
@@ -129,12 +124,13 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
         //createLocationRequestUpdate(context);
     }
 
-    private void stopLocationTrackingService(Context context){
-        Log.i(TAG,"USER STILL SIGNAL");
-        Utils.appendLog(TAG,"I","USER STILL SIGNAL");
+    private void stopLocationTrackingService(Context context,String tag){
+        Log.i(tag,"USER STILL SIGNAL");
+        Utils.appendLog(tag,"I","USER STILL SIGNAL");
         //let location tracking decide to stop tracking or not
         //LocationTrackingJobIntentService.cancelLocationTriggerAlarm(context);
     }
+
 
     private void createLocationRequestUpdate(Context context){
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED

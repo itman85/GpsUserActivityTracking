@@ -20,7 +20,8 @@ public class Constants {
     public static final String KEY_ADD_NEW_LIST = "add_new";
     public static final String GEO_ID_PLIT_CHAR = "_";
     public static final String SIGNAL_KEY  = "signal";
-    public static  final String ACTIVITY_FENCE_KEY = "activity_fence_key";
+    public static  final String ACTIVITY_STILL_FENCE_KEY = "activity_still_fence_key";
+    public static  final String ACTIVITY_MOVE_FENCE_KEY = "activity_move_fence_key";
     public static final String REGISTER_ACTIVTY_WORK_TAG  = "register_activity_work_tag";
     public static final String LOCATION_TRACKING_INTERVAL_WORK_TAG  = "location_tracking_interval_work_tag";
     public static final String LOCATION_TRACKING_INTERVAL_WORK_UNIQUE_NAME  = "location_tracking_interval_work_unique_name";

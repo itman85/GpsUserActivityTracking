@@ -5,10 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-public class NetworkChangeReceiver extends BroadcastReceiver {
-    private static final String TAG = "NetworkChangeReceiver";
+public class NewPictureReceiver extends BroadcastReceiver {
+    private static final String TAG = "NewPictureReceiver";
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.i(TAG,"onReceive network changed");
+        Log.i(TAG,"onReceive new picture");
     }
 }

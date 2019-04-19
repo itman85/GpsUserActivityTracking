@@ -31,7 +31,7 @@ import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
 import phannguyen.com.gpsuseractivitytracking.Utils;
 import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceModel;
 
-import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_FENCE_KEY;
+import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_STILL_FENCE_KEY;
 
 
 public class ActivitiesTransitionRequestUpdateService extends Service {
@@ -216,7 +216,7 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
         // Register the fence to receive callbacks.
         mPendingIntent = PendingIntentUtils.getFenceAwareNessPendingIntent(this);
         Awareness.getFenceClient(this).updateFences(new FenceUpdateRequest.Builder()
-                .addFence(ACTIVITY_FENCE_KEY, stayFence, mPendingIntent)
+                .addFence(ACTIVITY_STILL_FENCE_KEY, stayFence, mPendingIntent)
                 .build())
                 .addOnSuccessListener(aVoid -> {
                     Log.i(TAG, "Activity Fence was successfully registered.");
@@ -240,7 +240,7 @@ public class ActivitiesTransitionRequestUpdateService extends Service {
         }
 
         Awareness.getFenceClient(this).updateFences(fenceReqBuilder
-                .removeFence(ACTIVITY_FENCE_KEY)
+                .removeFence(ACTIVITY_STILL_FENCE_KEY)
                 //.removeFence(EXITING_LOCATION_FENCE_KEY)
                 //.removeFence(ENTERING_LOCATION_FENCE_KEY)
                 .build())

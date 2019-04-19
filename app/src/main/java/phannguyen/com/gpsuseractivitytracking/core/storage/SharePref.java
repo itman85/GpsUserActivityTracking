@@ -3,6 +3,8 @@ package phannguyen.com.gpsuseractivitytracking.core.storage;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import phannguyen.com.gpsuseractivitytracking.Constants;
+
 public class SharePref {
     private static String PREF_NAME = "GPSTestSharePref";
 
@@ -76,6 +78,18 @@ public class SharePref {
     public static boolean getLocationRequestUpdateStatus(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         return sharedPreferences.getBoolean("location_request_update",false);
+    }
+
+    public static void setLastRegisterActivityFence(Context context, String fenceActivityKey){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("last_fence_activity_key", fenceActivityKey);
+        editor.apply();
+    }
+
+    public static String getLastRegisterActivityFence(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getString("last_fence_activity_key", Constants.ACTIVITY_STILL_FENCE_KEY);
     }
 
 }

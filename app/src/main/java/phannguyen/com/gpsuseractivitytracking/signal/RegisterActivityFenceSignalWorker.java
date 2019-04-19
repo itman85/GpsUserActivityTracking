@@ -12,9 +12,7 @@ import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.awareness.fence.AwarenessFence;
 import com.google.android.gms.awareness.fence.DetectedActivityFence;
 import com.google.android.gms.awareness.fence.FenceUpdateRequest;
-import com.google.android.gms.awareness.fence.HeadphoneFence;
 import com.google.android.gms.awareness.fence.LocationFence;
-import com.google.android.gms.awareness.state.HeadphoneState;
 
 import java.util.List;
 
@@ -22,11 +20,13 @@ import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 import phannguyen.com.gpsuseractivitytracking.Constants;
+import phannguyen.com.gpsuseractivitytracking.core.storage.SharePref;
 import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceModel;
 import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
 import phannguyen.com.gpsuseractivitytracking.Utils;
 
-import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_FENCE_KEY;
+import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_MOVE_FENCE_KEY;
+import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_STILL_FENCE_KEY;
 
 public class RegisterActivityFenceSignalWorker extends Worker {
     private static final String TAG = "RegisterActivityWorker";
@@ -51,50 +51,46 @@ public class RegisterActivityFenceSignalWorker extends Worker {
     }
 
     private void setupFences() {
-        // DetectedActivityFence will fire when it detects the user performing the specified
-        // activity.  In this case it's walking.
-        AwarenessFence walkingFence = DetectedActivityFence.during(DetectedActivityFence.WALKING);
-
         AwarenessFence stayFence = DetectedActivityFence.during(DetectedActivityFence.STILL);
 
-        // There are lots of cases where it's handy for the device to know if headphones have been
-        // plugged in or unplugged.  For instance, if a music app detected your headphones fell out
-        // when you were in a library, it'd be pretty considerate of the app to pause itself before
-        // the user got in trouble.
-        AwarenessFence headphoneFence = HeadphoneFence.during(HeadphoneState.PLUGGED_IN);
+        AwarenessFence moveFence = AwarenessFence.or(
+                DetectedActivityFence.during(DetectedActivityFence.RUNNING),
+                DetectedActivityFence.during(DetectedActivityFence.ON_BICYCLE),
+                DetectedActivityFence.during(DetectedActivityFence.WALKING),
+                DetectedActivityFence.during(DetectedActivityFence.ON_FOOT),
+                DetectedActivityFence.during(DetectedActivityFence.IN_VEHICLE));
 
-        // Combines multiple fences into a compound fence.  While the first two fences trigger
-        // individually, this fence will only trigger its callback when all of its member fences
-        // hit a true state.
-        AwarenessFence walkingWithHeadphones = AwarenessFence.and(walkingFence, headphoneFence);
+        PendingIntent pendingIntent = PendingIntentUtils.getFenceAwareNessPendingIntent(getApplicationContext());
+        FenceUpdateRequest.Builder fenceReqBuilder = new FenceUpdateRequest.Builder();
 
-        // We can even nest compound fences.  Using both "and" and "or" compound fences, this
-        // compound fence will determine when the user has headphones in and is engaging in at least
-        // one form of exercise.
-        // The below breaks down to "(headphones plugged in) AND (walking OR running OR bicycling)"
-        AwarenessFence exercisingWithHeadphonesFence = AwarenessFence.and(
-                headphoneFence,
-                AwarenessFence.or(
-                        walkingFence,
-                        DetectedActivityFence.during(DetectedActivityFence.RUNNING),
-                        DetectedActivityFence.during(DetectedActivityFence.ON_BICYCLE)));
-
-
+        String lastKeyActivityFence = SharePref.getLastRegisterActivityFence(this.getApplicationContext());
+        if(lastKeyActivityFence.equals(ACTIVITY_MOVE_FENCE_KEY)){
+            fenceReqBuilder.addFence(ACTIVITY_STILL_FENCE_KEY,stayFence,pendingIntent)
+                    .removeFence(ACTIVITY_MOVE_FENCE_KEY);
+            //update last register activity fence
+            SharePref.setLastRegisterActivityFence(this.getApplicationContext(),ACTIVITY_STILL_FENCE_KEY);
+            lastKeyActivityFence = ACTIVITY_STILL_FENCE_KEY;
+        }else if(lastKeyActivityFence.equals(ACTIVITY_STILL_FENCE_KEY)){
+            fenceReqBuilder.addFence(ACTIVITY_MOVE_FENCE_KEY,moveFence,pendingIntent)
+                    .removeFence(ACTIVITY_STILL_FENCE_KEY);
+            //update last register activity fence
+            SharePref.setLastRegisterActivityFence(this.getApplicationContext(),ACTIVITY_MOVE_FENCE_KEY);
+            lastKeyActivityFence = ACTIVITY_MOVE_FENCE_KEY;
+        }
+        final String temp = lastKeyActivityFence;
         // Now that we have an interesting, complex condition, register the fence to receive
         // callbacks.
         Log.i(TAG, "Activity Fence now registered again.");
-        Utils.appendLog(TAG,"I","Activity Fence now registered again.");
+        Utils.appendLog(TAG,"I","Activity Fence now registered again for "+ temp);
         // Register the fence to receive callbacks.
-        Awareness.getFenceClient(this.getApplicationContext()).updateFences(new FenceUpdateRequest.Builder()
-                .addFence(ACTIVITY_FENCE_KEY, stayFence,PendingIntentUtils.getFenceAwareNessPendingIntent(getApplicationContext()))
-                .build())
+        Awareness.getFenceClient(this.getApplicationContext()).updateFences(fenceReqBuilder.build())
                 .addOnSuccessListener(aVoid -> {
                     Log.i(TAG, "Activity Fence was successfully registered again.");
-                    Utils.appendLog(TAG,"I","Activity Fence was successfully registered again.");
+                    Utils.appendLog(TAG,"I","Activity Fence was successfully registered again for "+temp);
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Activity Fence could not be registered again: " + e);
-                    Utils.appendLog(TAG,"E","Activity Fence could not be registered again: " + e);
+                    Utils.appendLog(TAG,"E","Activity Fence could not be registered again: " + e + " for "+temp);
                 });
     }
 

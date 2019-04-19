@@ -190,8 +190,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void applyRegisterActivityFenceSignalWork(String tag){
         PeriodicWorkRequest.Builder registerActivityWorkBuilder =
-                new PeriodicWorkRequest.Builder(RegisterActivityFenceSignalWorker.class, 1440,
-                        TimeUnit.MINUTES);
+                new PeriodicWorkRequest.Builder(RegisterActivityFenceSignalWorker.class, 720,
+                        TimeUnit.MINUTES);//every 12h
         PeriodicWorkRequest registerWork = registerActivityWorkBuilder.addTag(tag)
                 .build();
         WorkManager.getInstance().enqueue(registerWork);

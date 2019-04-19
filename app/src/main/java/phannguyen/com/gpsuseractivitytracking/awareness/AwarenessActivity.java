@@ -1,12 +1,9 @@
 package phannguyen.com.gpsuseractivitytracking.awareness;
 
 import android.Manifest;
-import android.app.Activity;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -35,12 +32,11 @@ import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import phannguyen.com.gpsuseractivitytracking.BuildConfig;
 import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
 import phannguyen.com.gpsuseractivitytracking.R;
 import phannguyen.com.gpsuseractivitytracking.awareness.logger.LogFragment;
 
-import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_FENCE_KEY;
+import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_STILL_FENCE_KEY;
 import static phannguyen.com.gpsuseractivitytracking.PendingIntentUtils.ACTIVITY_SIGNAL_RECEIVER_ACTION;
 
 public class AwarenessActivity extends AppCompatActivity {
@@ -95,7 +91,7 @@ public class AwarenessActivity extends AppCompatActivity {
     protected void onPause() {
         // Unregister the fence:
         Awareness.getFenceClient(this).updateFences(new FenceUpdateRequest.Builder()
-                .removeFence(ACTIVITY_FENCE_KEY)
+                .removeFence(ACTIVITY_STILL_FENCE_KEY)
                 .build())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -294,7 +290,7 @@ public class AwarenessActivity extends AppCompatActivity {
 
         // Register the fence to receive callbacks.
         Awareness.getFenceClient(this).updateFences(new FenceUpdateRequest.Builder()
-                .addFence(ACTIVITY_FENCE_KEY, stayFence, PendingIntentUtils.getFenceAwareNessPendingIntent(this))
+                .addFence(ACTIVITY_STILL_FENCE_KEY, stayFence, PendingIntentUtils.getFenceAwareNessPendingIntent(this))
                 .build())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -330,7 +326,7 @@ public class AwarenessActivity extends AppCompatActivity {
             // The state information for the given fence is em
             FenceState fenceState = FenceState.extract(intent);
 
-            if (TextUtils.equals(fenceState.getFenceKey(), ACTIVITY_FENCE_KEY)) {
+            if (TextUtils.equals(fenceState.getFenceKey(), ACTIVITY_STILL_FENCE_KEY)) {
                 String fenceStateStr;
                 switch (fenceState.getCurrentState()) {
                     case FenceState.TRUE:

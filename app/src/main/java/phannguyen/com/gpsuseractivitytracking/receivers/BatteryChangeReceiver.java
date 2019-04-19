@@ -5,10 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-public class NetworkChangeReceiver extends BroadcastReceiver {
-    private static final String TAG = "NetworkChangeReceiver";
+//https://developer.android.com/training/monitoring-device-state/battery-monitoring.html
+public class BatteryChangeReceiver extends BroadcastReceiver {
+    private static final String TAG = "BatteryChangeReceiver";
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.i(TAG,"onReceive network changed");
+        Log.i(TAG,"onReceive battery changed");
+
     }
 }
