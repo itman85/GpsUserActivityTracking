@@ -19,8 +19,8 @@ public class Utils {
         Thread task = new Thread(() -> {
             SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
             String dateFormat = s.format(new Date());
-
-            File logFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()+"/testlocation/mylog_"+tag+".txt");
+            String logFolder = MyApplication.appContext.getString(R.string.log_folder);
+            File logFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()+"/testlocation/"+logFolder+"/mylog_"+tag+".txt");
             if (!logFile.exists())
             {
                 try

@@ -33,6 +33,7 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 import phannguyen.com.gpsuseractivitytracking.jobs.LocationUpdateWorker;
+import phannguyen.com.gpsuseractivitytracking.receivers.PhotoJobService;
 import phannguyen.com.gpsuseractivitytracking.signal.LocationTrackingIntervalWorker;
 import phannguyen.com.gpsuseractivitytracking.signal.RegisterActivityFenceSignalWorker;
 
@@ -111,6 +112,12 @@ public class MainActivity extends AppCompatActivity {
         registerBtn.setOnClickListener(v -> {
             Intent serviceIntent = new Intent(MainActivity.this, RegisterReceiverService.class);
             startService(serviceIntent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                PhotoJobService.startJobService(MainActivity.this);
+                Toast.makeText(MainActivity.this,"Start register service and photo service",Toast.LENGTH_LONG).show();
+            }else{
+                Toast.makeText(MainActivity.this,"Under nougat no need to register receiver in this way",Toast.LENGTH_LONG).show();
+            }
         });
 
         List<String> permissionList = new ArrayList<>();

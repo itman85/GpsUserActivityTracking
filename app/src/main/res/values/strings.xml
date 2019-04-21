@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">GpsUserActivityTracking</string>
+    <string name="log_folder">tracking</string>
 </resources>

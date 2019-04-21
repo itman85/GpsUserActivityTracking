@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">RegisterReceiverTest</string>
+    <string name="log_folder">register</string>
 </resources>
