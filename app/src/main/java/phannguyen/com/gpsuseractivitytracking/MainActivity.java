@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
             //
             //LocationTrackingJobIntentService.enqueueWork(MainActivity.this,new Intent(MainActivity.this,LocationTrackingJobIntentService.class));
             //
-            applyRegisterActivityFenceSignalWork(REGISTER_ACTIVTY_WORK_TAG);
+            Utils.startRegisterActivityOneTimeRequest();//start immediately
             //
             //GeofencingDataManagement.Instance().addGeopointsList(Utils.createListGeoFencingPlaces());
             //

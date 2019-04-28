@@ -28,6 +28,7 @@ import phannguyen.com.gpsuseractivitytracking.core.storage.SharePref;
 import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceModel;
 import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceStatusModel;
 import phannguyen.com.gpsuseractivitytracking.geofencing.GeofencingDataManagement;
+import phannguyen.com.gpsuseractivitytracking.geofencing.service.GeofencingRequestUpdateService;
 import phannguyen.com.gpsuseractivitytracking.signal.LocationTrackingIntervalWorker;
 
 public class CoreTrackingJobService extends JobIntentService {
@@ -284,11 +285,17 @@ public class CoreTrackingJobService extends JobIntentService {
                     if (probableActivity.getType() == DetectedActivity.STILL && confidence >= 90) {
                         //user still, so cancel tracking location alarm
                         Utils.appendLog(TAG, "I", "User STILL now, Cancel LocationRequestUpdateService");
-                        //stop service1
+                        //stop interval check location work
                         cancelLocationTriggerAlarm(context);
+                        //stop location tracking
                         Intent serviceIntent = new Intent(context, LocationRequestUpdateService1.class);
                         serviceIntent.putExtra("action", "STOP");
                         startService(serviceIntent);
+                        //stop geo fencing tracking
+                        Intent serviceIntent1 = new Intent(context, GeofencingRequestUpdateService.class);
+                        serviceIntent1.putExtra("action","STOP");
+                        startService(serviceIntent1);
+                        //TODO: when user STILL will check if in/out geo fencing later ...
 
                         //remove location request update by pending intent in signal
                         /*if(SharePref.getLocationRequestUpdateStatus(context)) {

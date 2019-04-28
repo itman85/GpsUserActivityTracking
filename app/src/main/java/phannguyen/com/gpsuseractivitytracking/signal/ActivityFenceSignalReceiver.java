@@ -18,6 +18,7 @@ import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
 import phannguyen.com.gpsuseractivitytracking.Utils;
 import phannguyen.com.gpsuseractivitytracking.android7.locationtracking.LocationRequestUpdateService1;
 import phannguyen.com.gpsuseractivitytracking.core.storage.SharePref;
+import phannguyen.com.gpsuseractivitytracking.geofencing.service.GeofencingRequestUpdateService;
 
 import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_MOVE_FENCE_KEY;
 import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_STILL_FENCE_KEY;
@@ -120,6 +121,10 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
         serviceIntent.putExtra("action","START");
         context.startService(serviceIntent);
 
+        Intent serviceIntent1 = new Intent(context, GeofencingRequestUpdateService.class);
+        serviceIntent1.putExtra("action","START");
+        context.startService(serviceIntent1);
+
         //start request update location whenever user move
         //createLocationRequestUpdate(context);
     }
@@ -129,6 +134,8 @@ public class ActivityFenceSignalReceiver extends BroadcastReceiver {
         Utils.appendLog(tag,"I","USER STILL SIGNAL");
         //let location tracking decide to stop tracking or not
         //LocationTrackingJobIntentService.cancelLocationTriggerAlarm(context);
+
+        //TODO: when user STILL will check if in/out geo fencing later ...
     }
 
 

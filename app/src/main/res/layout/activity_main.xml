@@ -35,7 +35,7 @@
             android:id="@+id/awarenessBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Open Awareness Tracking"/>
+            android:text="Ask permision optimize battery"/>
 
         <Button
             android:id="@+id/registerBtn"

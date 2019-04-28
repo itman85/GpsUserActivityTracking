@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
@@ -20,13 +21,14 @@ import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 import phannguyen.com.gpsuseractivitytracking.Constants;
-import phannguyen.com.gpsuseractivitytracking.core.storage.SharePref;
-import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceModel;
 import phannguyen.com.gpsuseractivitytracking.PendingIntentUtils;
 import phannguyen.com.gpsuseractivitytracking.Utils;
+import phannguyen.com.gpsuseractivitytracking.core.storage.SharePref;
+import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceModel;
 
 import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_MOVE_FENCE_KEY;
 import static phannguyen.com.gpsuseractivitytracking.Constants.ACTIVITY_STILL_FENCE_KEY;
+import static phannguyen.com.gpsuseractivitytracking.Constants.INTERVAL_REGISTER_ACTIVITY_IN_MIN;
 
 public class RegisterActivityFenceSignalWorker extends Worker {
     private static final String TAG = "RegisterActivityWorker";
@@ -46,6 +48,8 @@ public class RegisterActivityFenceSignalWorker extends Worker {
         Data output = new Data.Builder()
                 .putInt(KEY_RESULT, count)
                 .build();
+        final Handler handler = new Handler();
+        handler.postDelayed(() -> Utils.startRegisterActivityOneTimeRequest(INTERVAL_REGISTER_ACTIVITY_IN_MIN), 500);
         return Result.success(output);
         //return null;
     }

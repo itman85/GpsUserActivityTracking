@@ -10,8 +10,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 import phannguyen.com.gpsuseractivitytracking.geofencing.GeoFencingPlaceModel;
+import phannguyen.com.gpsuseractivitytracking.signal.RegisterActivityFenceSignalWorker;
 
 public class Utils {
     public static void appendLog(String tag,String type,String text)
@@ -70,7 +75,31 @@ public class Utils {
         geoList.add(new GeoFencingPlaceModel(10.761632, 106.689747,200,"THDao_TDXu"));
         geoList.add(new GeoFencingPlaceModel(10.756505, 106.685195,100,"THDao_NVCu"));
         geoList.add(new GeoFencingPlaceModel(10.738842, 106.689521,100,"VXoay_TS"));
+        geoList.add(new GeoFencingPlaceModel(10.738688, 106.691259,200,"ChipH_TS"));
+        geoList.add(new GeoFencingPlaceModel(10.755289, 106.680659,200,"HKBike_THDao"));
+        geoList.add(new GeoFencingPlaceModel(10.732346, 106.705787,500,"TiemBank_PMH"));
+        geoList.add(new GeoFencingPlaceModel(10.769965, 106.694273,100,"NTNghia_LeLai"));
+        geoList.add(new GeoFencingPlaceModel(10.777699, 106.681903,100,"VXoay_DanChu"));
 
         return geoList;
     }
+
+    public static void startRegisterActivityOneTimeRequest(int delayInMin){
+        OneTimeWorkRequest registerActivityIntervalWork =
+                new OneTimeWorkRequest.Builder(RegisterActivityFenceSignalWorker.class)
+                        .setInitialDelay(delayInMin, TimeUnit.MINUTES)
+                        .addTag(Constants.REGISTER_ACTIVTY_WORK_TAG)// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
+                        .build();
+        //WorkManager.getInstance().enqueue(locationIntervalWork);
+        WorkManager.getInstance().enqueueUniqueWork(Constants.REGISTER_ACTIVTY_INTERVAL_WORK_UNIQUE_NAME, ExistingWorkPolicy.KEEP, registerActivityIntervalWork);
+    }
+
+    public static void startRegisterActivityOneTimeRequest(){
+        OneTimeWorkRequest registerActivityIntervalWork =
+                new OneTimeWorkRequest.Builder(RegisterActivityFenceSignalWorker.class)
+                        .addTag(Constants.REGISTER_ACTIVTY_WORK_TAG)// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
+                        .build();
+        WorkManager.getInstance().enqueueUniqueWork(Constants.REGISTER_ACTIVTY_INTERVAL_WORK_UNIQUE_NAME, ExistingWorkPolicy.KEEP, registerActivityIntervalWork);
+    }
+
 }

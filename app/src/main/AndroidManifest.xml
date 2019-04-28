@@ -20,6 +20,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
             android:name="com.google.android.awareness.API_KEY"
             android:value="AIzaSyAQG6foWSxz8aBVXCkcaVQ6erZ-fdspgNE"/>
         <activity android:name=".MainActivity">
@@ -32,49 +35,50 @@
         <activity android:name=".awareness.AwarenessActivity" android:theme="@style/AppTheme.NoActionBar">
 
         </activity>
-        <service android:name=".TestService" android:stopWithTask="false" />
-        <service android:name=".signal.ActivitiesTransitionRequestUpdateService" android:process=":kernel"/>
-        <service android:name=".android7.locationtracking.LocationRequestUpdateService" android:stopWithTask="false" />
+        <!--<service android:name=".TestService" android:stopWithTask="false" />-->
+        <!--<service android:name=".signal.ActivitiesTransitionRequestUpdateService" android:process=":kernel"/>-->
+        <!--<service android:name=".android7.locationtracking.LocationRequestUpdateService" android:stopWithTask="false" />-->
         <service android:name=".android7.locationtracking.LocationRequestUpdateService1" android:process=":geo" android:stopWithTask="false"/>
-        <service android:name=".TestGPSLocationTrackingService" android:process=":testgeo"/>
-        <service android:name=".android7.geofencing.GeofenceTransitionsIntentService"/>
-        <service android:name=".android7.geofencing.GeofencingRequestService" android:stopWithTask="false" />
-        <service
+        <!--<service android:name=".TestGPSLocationTrackingService" android:process=":testgeo"/>-->
+        <!--<service android:name=".android7.geofencing.GeofenceTransitionsIntentService"/>-->
+        <!--<service android:name=".android7.geofencing.GeofencingRequestService" android:stopWithTask="false" />-->
+       <!-- <service
             android:name=".jobs.LocationTrackingJobIntentService"
             android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
+            android:permission="android.permission.BIND_JOB_SERVICE" />-->
         <service
             android:name=".core.CoreTrackingJobService"
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />
-        <receiver android:name=".TransitionTrackingReceiver" android:exported="false">
+       <!-- <receiver android:name=".TransitionTrackingReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="${applicationId}.TRANSITIONS_RECEIVER_ACTION" />
             </intent-filter>
-        </receiver>
-        <receiver android:name=".android7.locationtracking.LocationTrackingReceiver" android:exported="false">
+        </receiver>-->
+       <!-- <receiver android:name=".android7.locationtracking.LocationTrackingReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="${applicationId}.LOCATION_UPDATE_RECEIVER_ACTION" />
             </intent-filter>
-        </receiver>
-        <receiver android:name=".android7.geofencing.GeofenceTransitionReceiver" android:exported="false">
+        </receiver>-->
+       <!-- <receiver android:name=".android7.geofencing.GeofenceTransitionReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="${applicationId}.GEOFENCING_TRANSITION_RECEIVER_ACTION" />
             </intent-filter>
-        </receiver>
-        <receiver android:name=".jobs.LocationTriggerReceiver"></receiver>
+        </receiver>-->
+        <!--<receiver android:name=".jobs.LocationTriggerReceiver"></receiver>-->
 
         <receiver android:name=".signal.ActivityFenceSignalReceiver">
             <intent-filter>
                 <action android:name="${applicationId}.ACTIVITY_SIGNAL_RECEIVER_ACTION" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".core.LocationTriggerAlarmReceiver" android:exported="false">
+       <!-- <receiver android:name=".core.LocationTriggerAlarmReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="${applicationId}.LOCATION_TRIGGER_ALARM_RECEIVER_ACTION" />
             </intent-filter>
-        </receiver>
+        </receiver>-->
 
+        <!-- REgister receiver -->
         <service android:name=".RegisterReceiverService" android:process=":register" android:stopWithTask="false" />
         <receiver android:name=".receivers.NetworkChangeReceiver" android:exported="true" android:enabled="true">
             <intent-filter>
@@ -107,6 +111,17 @@
         </receiver>
         <service android:name=".receivers.PhotoJobService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
+
+        <!-- GEO FENCING -->
+        <receiver
+            android:name=".geofencing.service.GeofenceBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".geofencing.service.GeofenceTransitionsJobIntentService"
+            android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service android:name=".geofencing.service.GeofencingRequestUpdateService" android:process=":trackinggeo" android:stopWithTask="false" />
     </application>
 
 </manifest>

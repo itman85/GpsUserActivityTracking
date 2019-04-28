@@ -69,6 +69,13 @@ public class LocationRequestUpdateService1 extends Service {
         isStartTracking = false;
     }
 
+    /**
+     * this will make sure will call again after killed by OS and back to work properly
+     * @param intent
+     * @param flags
+     * @param startId
+     * @return
+     */
     @Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
         Log.i(TAG, "Service onStartCommand");
@@ -78,7 +85,7 @@ public class LocationRequestUpdateService1 extends Service {
         if(intent==null){
             isOnTracking = SharePref.getLocationRequestUpdateStatus(this);
             if(isOnTracking){
-                isStartTracking  = false;//restart request update location
+                isStartTracking  = false;//restart request update location incase this service killed by OS
                 Utils.appendLog(TAG,"I","Service restart Null Intent, restart update location");
             }else{
                 //no location request update live now, so kill this service

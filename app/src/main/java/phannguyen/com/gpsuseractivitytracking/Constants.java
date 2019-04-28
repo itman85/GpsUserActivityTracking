@@ -15,6 +15,7 @@ public class Constants {
     public static final int INTERVAL_SLOW_MOVE_IN_MS = 60*1000;//1min
     public static final int INTERVAL_FAST_MOVE_IN_MS = 30*1000;//30S
     public static final int INTERVAL_CHECK_STILL_IN_MS = 3*60*1000;//3mins
+    public static int INTERVAL_REGISTER_ACTIVITY_IN_MIN = 12*60;;  /* 12 hours */
 
     public static final String KEY_REMOVE_LIST = "remove";
     public static final String KEY_ADD_NEW_LIST = "add_new";
@@ -23,6 +24,7 @@ public class Constants {
     public static  final String ACTIVITY_STILL_FENCE_KEY = "activity_still_fence_key";
     public static  final String ACTIVITY_MOVE_FENCE_KEY = "activity_move_fence_key";
     public static final String REGISTER_ACTIVTY_WORK_TAG  = "register_activity_work_tag";
+    public static final String REGISTER_ACTIVTY_INTERVAL_WORK_UNIQUE_NAME  = "register_activity_interval_work_unique_name";
     public static final String LOCATION_TRACKING_INTERVAL_WORK_TAG  = "location_tracking_interval_work_tag";
     public static final String LOCATION_TRACKING_INTERVAL_WORK_UNIQUE_NAME  = "location_tracking_interval_work_unique_name";
     //
