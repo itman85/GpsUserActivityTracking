@@ -91,7 +91,7 @@ public class Utils {
                         .addTag(Constants.REGISTER_ACTIVTY_WORK_TAG)// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
                         .build();
         //WorkManager.getInstance().enqueue(locationIntervalWork);
-        WorkManager.getInstance().enqueueUniqueWork(Constants.REGISTER_ACTIVTY_INTERVAL_WORK_UNIQUE_NAME, ExistingWorkPolicy.KEEP, registerActivityIntervalWork);
+        WorkManager.getInstance().enqueueUniqueWork(Constants.REGISTER_ACTIVTY_INTERVAL_WORK_UNIQUE_NAME, ExistingWorkPolicy.REPLACE, registerActivityIntervalWork);
     }
 
     public static void startRegisterActivityOneTimeRequest(){
@@ -99,7 +99,7 @@ public class Utils {
                 new OneTimeWorkRequest.Builder(RegisterActivityFenceSignalWorker.class)
                         .addTag(Constants.REGISTER_ACTIVTY_WORK_TAG)// Use this when you want to add initial delay or schedule initial work to `OneTimeWorkRequest` e.g. setInitialDelay(2, TimeUnit.HOURS)
                         .build();
-        WorkManager.getInstance().enqueueUniqueWork(Constants.REGISTER_ACTIVTY_INTERVAL_WORK_UNIQUE_NAME, ExistingWorkPolicy.KEEP, registerActivityIntervalWork);
+        WorkManager.getInstance().enqueueUniqueWork(Constants.REGISTER_ACTIVTY_INTERVAL_WORK_UNIQUE_NAME, ExistingWorkPolicy.REPLACE, registerActivityIntervalWork);
     }
 
 }
